@@ -47,9 +47,15 @@ export class Tile {
 		this.imgSrc = "/img/Regular/"
 		if (this.family <= 3) {
 			this.imgSrc += ["", "Man", "Pin", "Sou"][this.family];
-			this.imgSrc += String(this.value) + ".svg";
+			this.imgSrc += String(this.value);
+			if (this.red) {
+				this.imgSrc += "-Dora";
+			}
+			this.imgSrc += ".svg";
 		} else if (this.family === 4) {
 			this.imgSrc += ["", "Ton", "Nan", "Shaa", "Pei"][this.value] + ".svg";
+		} else if (this.family === 5) {
+			this.imgSrc += ["", "Chun", "Hatsu", "Haku"][this.value] + ".svg";
 		}
 	}
 }

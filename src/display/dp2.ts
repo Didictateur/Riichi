@@ -27,7 +27,7 @@ if (canvas) {
 		let delta = 50 * size;
 		let eps = 30 * size;
 		ctx.fillText("Caractère:", 55, y + delta + eps);
-		ctx.fillText("Rond:", 55, y + 3 * delta + yos * size + eps);
+		ctx.fillText("Pin:", 55, y + 3 * delta + yos * size + eps);
 		ctx.fillText("Bambou:", 55, y + 5 * delta + 2 * yos * size + eps);
 		ctx.fillText("Vent:", 55, y + 7 * delta + 3 * yos * size + eps);
 		ctx.fillText("Dragon:", 55, y + 9 * delta + 4 * yos * size + eps);

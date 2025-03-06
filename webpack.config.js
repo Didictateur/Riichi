@@ -1,13 +1,16 @@
 const path = require('path');
 
 module.exports = {
-  entry: './src/display/dp1.ts', // Point d'entrée principal
+  entry: {
+    dp1: './src/display/dp1.ts',
+    dp2: './src/display/dp2.ts'
+  },
   output: {
-    filename: 'dp1.js', // Fichier de sortie
+    filename: '[name].js',
     path: path.resolve(__dirname, 'build'),
   },
   resolve: {
-    extensions: ['.ts', '.js'], // Extensions prises en charge
+    extensions: ['.ts', '.js'],
   },
   module: {
     rules: [

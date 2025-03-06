@@ -1,12 +1,96 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="fr">
 <head>
-	<meta charset="UTF-8">
-	<title>Rectangle Vert</title>
+    <meta charset="UTF-8">
+    <title>Mahjong</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #F0EDFF;
+        }
+        .menu {
+            display: flex;
+            justify-content: center;
+            background-color: #4CAF50;
+            padding: 10px 0;
+        }
+        .menu-item {
+            position: relative;
+            list-style: none;
+        }
+        .menu-item > a {
+            color: white;
+            text-decoration: none;
+            padding: 10px 20px;
+            display: block;
+        }
+        .menu-item > a:hover {
+            background-color: #45a049;
+        }
+        .dropdown {
+            display: none;
+            position: absolute;
+            top: 100%;
+            left: 0;
+            background-color: white;
+            box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
+        }
+        .dropdown a {
+            color: black;
+            text-decoration: none;
+            padding: 10px 20px;
+            display: block;
+        }
+        .dropdown a:hover {
+            background-color: #ddd;
+        }
+        .menu-item:hover .dropdown {
+            display: block;
+        }
+    </style>
 </head>
-<body style="background-color:#F0EDFF">
-	<canvas id="myCanvas" width="1000" height="1000"></canvas>
-	<script type="module"  src="build/dp1.js"></script>
+<body>
+    <nav class="menu">
+        <ul class="menu-item">
+            <a href="#">Riichi Mahjong</a>
+            <div class="dropdown">
+                <a href="#" onclick="loadScript('dp1.js')">Présentation des tuiles</a>
+                <a href="#" onclick="loadScript('dp2.js')">La main</a>
+                <a href="#" onclick="loadScript('dp3.js')">Les groupes</a>
+        	</div>
+        </ul>
+				<ul class="menu-item">
+					<a href="#">Yaku trainer</a>
+					<div class="dropdown">
+						<a href="#" onclick="loadScript('')">Yaku 1</a>
+					</div>
+				</ul>
+    </nav>
+
+		<div id="canvasContainer"></div>
+
+    <script>
+				const loaderScript = new Set();
+
+        function loadScript(scriptName) {
+					const container = document.getElementById("canvasContainer");
+					container.innerHTML = `<canvas id="myCanvas" width="1000" height="1000"></canvas>`;
+
+					const timestamp = new Date().getTime();
+
+					const script = document.createElement("script");
+					script.type = "module";
+					script.src = `build/${scriptName}?t=${timestamp}`;
+
+					script.onload = () => {};
+					document.body.appendChild(script);
+				}
+					
+				//script initial
+				loadScript('dp1.js');
+    </script>
 </body>
 </html>
 
