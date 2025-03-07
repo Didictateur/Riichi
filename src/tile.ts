@@ -2,13 +2,21 @@ export class Tile {
 	private family: number;
 	private value: number;
 	private red: boolean;
+	private loadded: boolean;
 	private imgSrc: string;
+	private imgFront: HTMLImageElement;
+	private imgBack: HTMLImageElement;
+	private img: HTMLImageElement;
 		
 	public constructor(family: number, value: number	, red: boolean) {
 		this.family = family;
 		this.value = value;
 		this.red = red;
+		this.loadded = false;
 		this.imgSrc = "";
+		this.imgFront = new Image();
+		this.imgBack = new Image();
+		this.img = new Image();
 		this.setImgSrc();
 	}
 
@@ -29,21 +37,31 @@ export class Tile {
 		x: number,
 		y: number,
 		size: number
-	): undefined {
-		const imgFront = new Image();
-		imgFront.src = "/img/Regular/Front.svg";
-		imgFront.onload = () => {
-			ctx.drawImage(imgFront, x, y, 75 * size, 100 * size);
-		};
-		
-		const img = new Image();
-		img.src = this.imgSrc;
-		img.onload = () => {
-			ctx.drawImage(img, x, y, 75 * size, 100 * size);
-		};
+	): void {
+		ctx.drawImage(this.imgFront, x, y, 75 * size, 100 * size);
+		ctx.drawImage(this.img, x, y, 75 * size, 100 * size);
 	}
 
-	private setImgSrc(): undefined {
+	public isLessThan(t: Tile): boolean {
+		if (this.family < t.family) {
+			return true;
+		} else if (this.family === t.family && this.value <= t.value) {
+			return true;
+		} else {
+			return false;
+		}
+	}
+
+	public cleanup(): void {
+		this.imgFront.onload = null;
+		this.imgFront.onerror = null;
+		this.imgBack.onload = null;
+		this.imgBack.onerror = null;
+		this.img.onload = null;
+		this.img.onerror = null;
+	}
+
+	private setImgSrc(): void {
 		this.imgSrc = "/img/Regular/"
 		if (this.family <= 3) {
 			this.imgSrc += ["", "Man", "Pin", "Sou"][this.family];
@@ -57,5 +75,21 @@ export class Tile {
 		} else if (this.family === 5) {
 			this.imgSrc += ["", "Chun", "Hatsu", "Haku"][this.value] + ".svg";
 		}
+	}
+
+	public async preloadImg(): Promise<void> {
+		await Promise.all([
+			this.loadImg(this.imgFront, "/img/Regular/Front.svg"),
+			this.loadImg(this.imgBack, "/img/Regular/Back.svg"),
+			this.loadImg(this.img, this.imgSrc)
+		]);
+	}
+
+	private loadImg(img: HTMLImageElement, src: string): Promise<void> {
+		return new Promise((resolve, reject) => {
+			img.onload = () => resolve();
+			img.onerror = () => reject();
+			img.src = src;
+		});
 	}
 }

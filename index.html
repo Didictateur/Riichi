@@ -72,20 +72,23 @@
 		<div id="canvasContainer"></div>
 
     <script>
-				const loaderScript = new Set();
+				let currentScript = null;
 
         function loadScript(scriptName) {
+					if (window.cleanup) {
+						window.cleanup();
+					}
+
 					const container = document.getElementById("canvasContainer");
 					container.innerHTML = `<canvas id="myCanvas" width="1000" height="1000"></canvas>`;
 
 					const timestamp = new Date().getTime();
 
-					const script = document.createElement("script");
-					script.type = "module";
-					script.src = `build/${scriptName}?t=${timestamp}`;
+					currentScript = document.createElement("script");
+					currentScript.type = "module";
+					currentScript.src = `build/${scriptName}?t=${timestamp}`;
 
-					script.onload = () => {};
-					document.body.appendChild(script);
+					document.body.appendChild(currentScript);
 				}
 					
 				//script initial
