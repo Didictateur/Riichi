@@ -31,7 +31,7 @@ async function display () {
 			const interval = 1000 / FPS;
 
 			// tuiles
-			let x = 150;
+			let x = 100;
 			let y = 150;
 			let os = 75;
 			let size = 0.75;
@@ -49,6 +49,7 @@ async function display () {
 			const edeck = new Deck(false);
 			await edeck.preload();
 			const ehand = edeck.getRandomHand();
+			ehand.push(edeck.pop());
 			ehand.sort();
 
 			let selectedTile: number|undefined = undefined;
@@ -103,6 +104,17 @@ async function display () {
 						selectedTile = q;
 					} else {
 						selectedTile = undefined;
+					}
+				}
+			);
+			canvas.addEventListener(
+				"mousedown",
+				(event) => {
+					if (selectedTile !== undefined) {
+						edeck.push(ehand.eject(selectedTile));
+						edeck.shuffle();
+						ehand.push(edeck.pop());
+						ehand.sort();
 					}
 				}
 			);

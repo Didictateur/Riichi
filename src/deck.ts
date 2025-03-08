@@ -46,10 +46,18 @@ export class Deck {
 		}
 	}
 
+	public length(): number {
+		return this.tiles.length;
+	}
+
 	public pop(): Tile {
 		if (this.tiles.length === 0) {
 		}
 		return this.tiles.pop() as NonNullable<Tile>;
+	}
+
+	public push(tile: Tile) {
+		this.tiles.push(tile);
 	}
 
 	public find(family: number, value: number): Tile | undefined {

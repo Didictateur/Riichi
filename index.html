@@ -8,13 +8,14 @@
             font-family: Arial, sans-serif;
             margin: 0;
             padding: 0;
-            background-color: #F0EDFF;
+						background-color: #007730;
         }
         .menu {
             display: flex;
             justify-content: center;
             background-color: #4CAF50;
-            padding: 10px 0;
+            padding: 0px 0;
+						font-size: 26px;
         }
         .menu-item {
             position: relative;
@@ -33,15 +34,22 @@
             display: none;
             position: absolute;
             top: 100%;
-            left: 0;
+            left: 50%;
+						transform: translateX(-40%);
             background-color: white;
-            box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
+            box-shadow: 0px 5px 8px rgba(0, 0, 0, 0.1);
+						min-width: 200px;
+						white-space: nowrap;
+						font-size: 20px;
         }
         .dropdown a {
             color: black;
             text-decoration: none;
-            padding: 10px 20px;
+            padding: 10px 10px;
             display: block;
+						white-space: nowrap;
+						width: 100%;
+						box-sizing: border-box;
         }
         .dropdown a:hover {
             background-color: #ddd;
@@ -53,18 +61,41 @@
 </head>
 <body>
     <nav class="menu">
+				<ul class="menu-item">
+					<a href="#" onclick="loadScript('accueil.js')">Accueil</a>
+				</ul>
         <ul class="menu-item">
             <a href="#">Riichi Mahjong</a>
             <div class="dropdown">
-                <a href="#" onclick="loadScript('dp1.js')">Présentation des tuiles</a>
-                <a href="#" onclick="loadScript('dp2.js')">La main</a>
-                <a href="#" onclick="loadScript('dp3.js')">Les groupes</a>
+                <a href="#" onclick="loadScript('dp1.js')">Chap 1: Présentation des tuiles</a>
+                <a href="#" onclick="loadScript('dp2.js')">Chap 2: La main</a>
+                <a href="#" onclick="loadScript('dp3.js')">Chap 3: Les groupes</a>
+								<a href="#" onclick="loadScript('dp4.js')">Chap 4: Avoir une main valide en jeu</a>
+								<a href="#" onclick="loadScript('dp5.js')">Chap 5: Le vent du joueur</a>
+								<a href="#" onclick="loadScript('dp6.js')">Chap 6: Les yakus</a>
+								<a href="#" onclick="loadScript('dp7.js')">Chap 7: Le riichi</a>
+								<a href="#" onclick="loadScript('dp8.js')">Chap 8: Première partie complète</a>
+								<a href="#" onclick="loadScript('dp9.js')">Chap 9: Score: les Hans</a>
+								<a href="#" onclick="loadScript('dp10.js')">Chap 10: Score: les doras</a>
+								<a href="#" onclick="loadScript('dp11.js')">Chap 11: Score: les Fus</a>
+								<a href="#" onclick="loadScript('dp12.js')">Chap 12: Score: le calcul des points</a>
+								<a href="#" onclick="loadScript('dp13.js')">Chap 13: Partie avec les scores</a>
         	</div>
         </ul>
+				<ul class="menu-item">
+					<a href="#" onclick="loadScript('')">Riichi à trois</a>
+				</ul>
 				<ul class="menu-item">
 					<a href="#">Yaku trainer</a>
 					<div class="dropdown">
 						<a href="#" onclick="loadScript('')">Yaku 1</a>
+					</div>
+				</ul>
+				<ul class="menu-item">
+					<a href="#">MCR</a>
+					<div class="dropdown">
+						<a href="#" onclick="loadScript('')">Chap 1:</a>
+						<a href="#" onclick="loadScript('')">Chap 2:</a>
 					</div>
 				</ul>
     </nav>

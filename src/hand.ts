@@ -1,4 +1,5 @@
 import { Tile } from "./tile"
+import { Group } from "./group"
 
 export class Hand {
 	private tiles: Array<Tile>;
@@ -21,6 +22,10 @@ export class Hand {
 		}
 	}
 
+	public length(): number {
+		return this.tiles.length;
+	}
+
 	public push(tile: Tile): undefined {
 		this.tiles.push(tile);
 	}
@@ -29,14 +34,103 @@ export class Hand {
 		return this.tiles.pop();
 	}
 
-	public sort(): undefined {
+	public find(family: number, value: number) :Tile|undefined {
+		let n = undefined;
 		for (let i = 0; i < this.tiles.length; i++) {
-			for (let j = 0; j < this.tiles.length-1; j++) {
-				if (!this.tiles[j].isLessThan(this.tiles[j+1])) {
-					[this.tiles[j], this.tiles[j+1]] = [this.tiles[j+1], this.tiles[j]];
-				}
+			if (this.tiles[i].getFamily() === family && this.tiles[i].getValue() === value) {
+				n = i;
+				break;
 			}
 		}
+		if (n !== undefined) {
+			[this.tiles[n], this.tiles[0]] = [this.tiles[0], this.tiles[n]];
+			let t = this.tiles.shift();
+			this.sort();
+			return t;
+		} else {
+			return undefined;
+		}
+	}
+
+	public eject(idTile: number): Tile {
+		[this.tiles[0], this.tiles[idTile]] = [this.tiles[idTile], this.tiles[0]];
+		let tile = this.tiles.shift();
+		this.sort();
+		return tile as NonNullable<Tile>;
+	}
+
+	public sort(): undefined {
+		this.tiles.sort((a, b) => a.isLessThan(b) ? -1 : 1);
+	}
+
+	public count(family: number, value: number): number {
+		let c = 0;
+		this.tiles.forEach(
+			t => {
+				if (t.getFamily() === family && t.getValue() === value) {
+					c++;
+				}
+			}
+		);
+		return c;
+	}
+
+	public toGroup(pair: boolean = false): Array<Group>|undefined {
+		if (this.tiles.length > 0) {
+			let t1 = this.tiles.pop() as NonNullable<Tile>;
+			
+			let c = this.count(t1.getFamily(), t1.getValue());
+			if (c >= 1 && !pair) { //can do a pair
+				let t2 = this.find(t1.getFamily(), t1.getValue()) as NonNullable<Tile>;
+				let groups = this.toGroup(true);
+				this.tiles.push(t2);
+				this.sort();
+				if (groups !== undefined) {
+					this.tiles.push(t1);
+					this.sort();
+					groups.push(new Group([t1, t2]));
+					return groups;
+				}
+			}
+			if (c >= 2) { //can do a pon
+				let t2 = this.find(t1.getFamily(), t1.getValue()) as NonNullable<Tile>;
+				let t3 = this.find(t1.getFamily(), t1.getValue()) as NonNullable<Tile>;
+				let groups = this.toGroup(pair);
+				this.tiles.push(t2);
+				this.tiles.push(t3);
+				this.sort();
+				if (groups !== undefined) {
+					groups.push(new Group([t1, t2, t3]));
+					this.tiles.push(t1);
+					this.sort();
+					return groups;
+				}
+			}
+			
+			let c2 = this.count(t1.getFamily(), t1.getValue()-1);
+			let c3 = this.count(t1.getFamily(), t1.getValue()-2);
+			if (c2 * c3 > 0) { //can do a chii
+				let t2 = this.find(t1.getFamily(), t1.getValue()-1) as NonNullable<Tile>;
+				let t3 = this.find(t1.getFamily(), t1.getValue()-2) as NonNullable<Tile>;
+				let groups = this.toGroup(pair);
+				this.tiles.push(t2);
+				this.tiles.push(t3);
+				this.sort();
+				if (groups !== undefined) {
+					groups.push(new Group([t3, t2, t1]));
+					this.tiles.push(t1);
+					this.sort();
+					return groups;
+				}
+			}
+
+			this.tiles.push(t1);
+			this.tiles.sort();
+
+		} else {
+			return [];
+		}
+		return undefined
 	}
 	
 	public drawHand (
@@ -45,31 +139,38 @@ export class Hand {
 		y: number,
 		offset: number,
 		size: number,
-		focusedTiled: number|undefined = undefined
-	): void {	
-		for (var i = 0; i < this.tiles.length; i++) {
+		focusedTiled: number|undefined = undefined,
+		hidden: boolean = false,
+		rotation: number = 0
+	): void {
+		let v = (75 + offset) * size;
+		let vx = Math.cos(rotation) * v;
+		let vy = Math.sin(rotation) * v;
+		for (let i = 0; i < this.tiles.length; i++) {
 			if (i === focusedTiled) {
 				this.tiles[i].drawTile(
 					ctx,
-					x + i * 75 * size + i * offset * size,
-					y - 25 * size,
-					size
+					x + i * vx + 25 * size * Math.sin(rotation),
+					y + i * vy - 25 * size * Math.cos(rotation),
+					size,
+					hidden,
+					rotation
 				);
 			} else {
 				this.tiles[i].drawTile(
 					ctx,
-					x + i * 75 * size + i * offset * size,
-					y,
-					size
+					x + i * vx,
+					y + i * vy,
+					size,
+					hidden,
+					rotation
 				);
 			}
 		}
 	}
 
 	public async preload(): Promise<void> {
-		for (let i = 0; i < this.tiles.length; i++) {
-			await this.tiles[i].preloadImg();
-		}
+		await Promise.all(this.tiles.map(t => t.preloadImg()));
 	}
 
 	public cleanup(): void {

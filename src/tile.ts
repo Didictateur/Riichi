@@ -2,21 +2,21 @@ export class Tile {
 	private family: number;
 	private value: number;
 	private red: boolean;
-	private loadded: boolean;
 	private imgSrc: string;
 	private imgFront: HTMLImageElement;
 	private imgBack: HTMLImageElement;
 	private img: HTMLImageElement;
+	private tilt: number;
 		
 	public constructor(family: number, value: number	, red: boolean) {
 		this.family = family;
 		this.value = value;
 		this.red = red;
-		this.loadded = false;
 		this.imgSrc = "";
 		this.imgFront = new Image();
 		this.imgBack = new Image();
 		this.img = new Image();
+		this.tilt = 0;
 		this.setImgSrc();
 	}
 
@@ -32,14 +32,46 @@ export class Tile {
 		return this.red;
 	}
 
+	public setTilt(): void {
+		this.tilt = (1 - 2 * Math.random()) * 0.05;
+	}
+
 	public drawTile(
 		ctx: CanvasRenderingContext2D,
 		x: number,
 		y: number,
-		size: number
+		size: number,
+		hidden: boolean = false,
+		rotation: number = 0
 	): void {
-		ctx.drawImage(this.imgFront, x, y, 75 * size, 100 * size);
-		ctx.drawImage(this.img, x, y, 75 * size, 100 * size);
+		ctx.save();
+		ctx.translate(x + (75 * size) / 2, y + (100 * size) / 2);
+		ctx.rotate(rotation + this.tilt);
+
+		if (hidden) {
+			ctx.drawImage(
+				this.imgBack,
+				-(75 * size) / 2,
+				-(100 * size) / 2,
+				75 * size, 100 * size
+			);
+		} else {
+			ctx.drawImage(
+				this.imgFront,
+				-(75 * size) / 2,
+				-(100 * size) / 2,
+				75 * size, 100 * size
+			);
+			ctx.drawImage(
+				this.img,
+				-(75 * size) / 2,
+				-(100 * size) / 2,
+				75 * size,
+				100 * size
+			);
+		}
+
+		ctx.restore();
 	}
 
 	public isLessThan(t: Tile): boolean {
