@@ -3,6 +3,7 @@ import { Group } from "./group"
 
 export class Hand {
 	private tiles: Array<Tile>;
+	public isolate: boolean = false;
 	
 	public constructor(stiles: string = "") {
 		this.tiles = [];
@@ -26,7 +27,7 @@ export class Hand {
 		return this.tiles.length;
 	}
 
-	public push(tile: Tile): undefined {
+	public push(tile: Tile): void {
 		this.tiles.push(tile);
 	}
 
@@ -57,6 +58,14 @@ export class Hand {
 		let tile = this.tiles.shift();
 		this.sort();
 		return tile as NonNullable<Tile>;
+	}
+
+	public get(idTile: number|undefined): Tile|undefined {
+		if (idTile !== undefined) {
+			return this.tiles[idTile];
+		} else {
+			return undefined;
+		}
 	}
 
 	public sort(): undefined {
@@ -147,11 +156,18 @@ export class Hand {
 		let vx = Math.cos(rotation) * v;
 		let vy = Math.sin(rotation) * v;
 		for (let i = 0; i < this.tiles.length; i++) {
+			let e = (i === this.tiles.length - 1 && this.isolate) ? 10 : 0;
 			if (i === focusedTiled) {
 				this.tiles[i].drawTile(
 					ctx,
-					x + i * vx + 25 * size * Math.sin(rotation),
-					y + i * vy - 25 * size * Math.cos(rotation),
+					x +
+						i * vx +
+						25 * size * Math.sin(rotation) +
+						e * size * Math.cos(rotation),
+					y +
+						i * vy -
+						25 * size * Math.cos(rotation) +
+						e * size * Math.sin(rotation),
 					size,
 					hidden,
 					rotation
@@ -159,8 +175,8 @@ export class Hand {
 			} else {
 				this.tiles[i].drawTile(
 					ctx,
-					x + i * vx,
-					y + i * vy,
+					x + i * vx + e * size * Math.cos(rotation),
+					y + i * vy + e * size * Math.sin(rotation),
 					size,
 					hidden,
 					rotation

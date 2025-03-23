@@ -5,6 +5,7 @@ export class Tile {
 	private imgSrc: string;
 	private imgFront: HTMLImageElement;
 	private imgBack: HTMLImageElement;
+	private imgGray: HTMLImageElement;
 	private img: HTMLImageElement;
 	private tilt: number;
 		
@@ -15,6 +16,7 @@ export class Tile {
 		this.imgSrc = "";
 		this.imgFront = new Image();
 		this.imgBack = new Image();
+		this.imgGray = new Image();
 		this.img = new Image();
 		this.tilt = 0;
 		this.setImgSrc();
@@ -28,12 +30,16 @@ export class Tile {
 		return this.value;
 	}
 
+	public isEqual(family: number, value: number): boolean {
+		return this.family === family && this.value === value;
+	}
+
 	public isRed(): boolean {
 		return this.red;
 	}
 
 	public setTilt(): void {
-		this.tilt = (1 - 2 * Math.random()) * 0.05;
+		this.tilt = (1 - 2 * Math.random()) * 0.04;
 	}
 
 	public drawTile(
@@ -42,7 +48,8 @@ export class Tile {
 		y: number,
 		size: number,
 		hidden: boolean = false,
-		rotation: number = 0
+		rotation: number = 0,
+		gray: boolean = false
 	): void {
 		ctx.save();
 		ctx.translate(x + (75 * size) / 2, y + (100 * size) / 2);
@@ -69,6 +76,15 @@ export class Tile {
 				75 * size,
 				100 * size
 			);
+			if (gray) {
+				ctx.drawImage(
+					this.imgGray,
+					-(75 * size) / 2,
+					-(100 * size) / 2,
+					75 * size,
+					100 * size
+				);
+			}
 		}
 
 		ctx.restore();
@@ -89,6 +105,8 @@ export class Tile {
 		this.imgFront.onerror = null;
 		this.imgBack.onload = null;
 		this.imgBack.onerror = null;
+		this.imgGray.onload = null;
+		this.imgGray.onerror = null;
 		this.img.onload = null;
 		this.img.onerror = null;
 	}
@@ -113,6 +131,7 @@ export class Tile {
 		await Promise.all([
 			this.loadImg(this.imgFront, "/img/Regular/Front.svg"),
 			this.loadImg(this.imgBack, "/img/Regular/Back.svg"),
+			this.loadImg(this.imgGray, "/img/Regular/Gray.svg"),
 			this.loadImg(this.img, this.imgSrc)
 		]);
 	}

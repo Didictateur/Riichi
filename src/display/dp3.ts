@@ -69,6 +69,7 @@ function drawFrame() {
 		HANDS[6].drawHand(staticCtx, x + (75+xos)*size, y + 2*(100+yos)*size, 5, 0.75);
 		HANDS[7].drawHand(staticCtx, x + 2*(75+xos)*size, y + 2*(100+yos)*size, 5, 0.75);
 
+		HANDS[8].isolate = true;
 		HANDS[8].drawHand(staticCtx, 100, 800, 5, size, selectedTile);
 
 		let groups = HANDS[8].toGroup();
@@ -117,8 +118,8 @@ function initEventListeners() {
 					if (selectedTile !== undefined) {
 						DECKS[0].push(HANDS[8].eject(selectedTile));
 						DECKS[0].shuffle();
-						HANDS[8].push(DECKS[0].pop());
 						HANDS[8].sort();
+						HANDS[8].push(DECKS[0].pop());
 					}
         }
     };

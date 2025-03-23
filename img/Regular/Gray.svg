@@ -1,0 +1,48 @@
+<?xml version="1.0"?>
+<svg width="300" height="400" xmlns="http://www.w3.org/2000/svg" xmlns:svg="http://www.w3.org/2000/svg" version="1.1">
+ <defs id="defs4">
+  <clipPath clipPathUnits="userSpaceOnUse" id="clipPath4243">
+   <circle cx="-264.66" cy="-198.21" fill="#000000" fill-opacity="0.3" fill-rule="nonzero" id="circle4245" r="293.95" stroke="#000000" stroke-dashoffset="0" stroke-linejoin="round" stroke-miterlimit="4" stroke-width="19.13"/>
+  </clipPath>
+  <clipPath clipPathUnits="userSpaceOnUse" id="clipPath7847">
+   <ellipse cx="394" cy="552.36" fill="#822600" fill-rule="nonzero" id="ellipse7849" rx="349.5" ry="216" stroke-dashoffset="0" stroke-linecap="round" stroke-linejoin="round" stroke-miterlimit="4" stroke-width="12"/>
+  </clipPath>
+  <clipPath clipPathUnits="userSpaceOnUse" id="clipPath4243-1">
+   <circle cx="-264.66" cy="-198.21" fill="#000000" fill-opacity="0.3" fill-rule="nonzero" id="circle4245-4" r="293.95" stroke="#000000" stroke-dashoffset="0" stroke-linejoin="round" stroke-miterlimit="4" stroke-width="19.13"/>
+  </clipPath>
+  <clipPath clipPathUnits="userSpaceOnUse" id="clipPath7876">
+   <circle cx="-264.66" cy="-198.21" fill="#000000" fill-opacity="0.3" fill-rule="nonzero" id="circle7878" r="293.95" stroke="#000000" stroke-dashoffset="0" stroke-linejoin="round" stroke-miterlimit="4" stroke-width="19.13"/>
+  </clipPath>
+  <clipPath clipPathUnits="userSpaceOnUse" id="clipPath14693">
+   <rect fill="#a53c3c" fill-rule="nonzero" height="168.82" id="rect14695" rx="1.26" ry="3.75" stroke-dashoffset="0" stroke-linecap="round" stroke-linejoin="round" stroke-miterlimit="4" stroke-width="8" transform="matrix(0.99939083,-0.03489951,0.03489951,0.99939083,0,0)" width="131.78" x="-332.6" y="383.5"/>
+  </clipPath>
+  <clipPath clipPathUnits="userSpaceOnUse" id="clipPath14952">
+   <ellipse cx="-271.34" cy="647.26" fill="#a53c3c" fill-rule="nonzero" id="ellipse14954" rx="69.06" ry="116.91" stroke-dashoffset="0" stroke-linecap="round" stroke-linejoin="round" stroke-miterlimit="4" stroke-width="7" transform="matrix(0.99939083,-0.03489951,0.03489951,0.99939083,0,0)"/>
+  </clipPath>
+  <mask id="mask4222" maskUnits="userSpaceOnUse">
+   <rect fill="#ff3737" fill-rule="nonzero" height="400.78" id="rect4224" ry="40" stroke-dashoffset="0" stroke-linejoin="round" stroke-miterlimit="4" stroke-width="10" width="300.06" x="0" y="652.28"/>
+  </mask>
+  <mask id="mask4216" maskUnits="userSpaceOnUse">
+   <rect fill="#ff3737" fill-rule="nonzero" height="400.78" id="rect4218" ry="40" stroke-dashoffset="0" stroke-linejoin="round" stroke-miterlimit="4" stroke-width="10" transform="scale(-1,-1)" width="300.06" x="-451.94" y="-1325.6"/>
+  </mask>
+  <mask id="mask4222-0" maskUnits="userSpaceOnUse">
+   <rect fill="#ff3737" fill-rule="nonzero" height="400.78" id="rect4224-8" ry="40" stroke-dashoffset="0" stroke-linejoin="round" stroke-miterlimit="4" stroke-width="10" width="300.06" x="0" y="652.28"/>
+  </mask>
+  <filter color-interpolation-filters="sRGB" id="filter4198-8">
+   <feGaussianBlur id="feGaussianBlur4200-3" result="blur" stdDeviation="2.51 2.51"/>
+  </filter>
+  <mask id="mask4216-0" maskUnits="userSpaceOnUse">
+   <rect fill="#ff3737" fill-rule="nonzero" height="400.78" id="rect4218-5" ry="40" stroke-dashoffset="0" stroke-linejoin="round" stroke-miterlimit="4" stroke-width="10" transform="scale(-1,-1)" width="300.06" x="-451.94" y="-1325.6"/>
+  </mask>
+  <pattern height="6" id="EMFhbasepattern" patternUnits="userSpaceOnUse" width="6" x="0" y="0"/>
+ </defs>
+ <metadata id="metadata7">image/svg+xml</metadata>
+ <g class="layer">
+  <title>Layer 1</title>
+  <g id="layer1" opacity="0.35">
+   <rect fill="#000000" fill-rule="nonzero" height="400.78" id="rect4164" ry="40" stroke-dashoffset="0" stroke-linejoin="round" stroke-miterlimit="4" stroke-width="10" width="300.06" y="-0.08"/>
+   <path d="m-4.77,122.71c-4.88,-33.08 -12.08,-100.83 3.49,-123.01c20.28,-26.12 234.78,-20.43 264.59,1.85c12.9,8.74 -192.96,9.21 -216.21,37.83c-22.71,27.37 -46.45,126.45 -51.87,83.33z" fill="#000000" fill-rule="evenodd" filter="url(#filter4198-8)" id="path4166" mask="url(#mask4222-0)" stroke-width="1px" transform="translate(-1.34328e-07, -1.33688e-06)"/>
+   <path d="m151.74,1677.38c-3.33,-9.32 -10.25,-68.46 5.31,-90.63c20.28,-26.12 219.44,-16.46 231.56,-9.93c11.07,5.32 -178.6,0.06 -204.85,34.87c-21.6,30 -26.5,82.17 -32.02,65.69z" fill="#000000" fill-opacity="0.2" fill-rule="evenodd" filter="url(#filter4198-8)" id="path4221" mask="url(#mask4216-0)" stroke-width="1px" transform="matrix(-1, 0, 0, -1, 451.938, 1977.89)"/>
+  </g>
+ </g>
+</svg>

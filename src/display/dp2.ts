@@ -74,6 +74,7 @@ async function display () {
 				}
 
 				// dynamic hand
+				ehand.isolate = true;
 				ehand.drawHand(offScreenCtx, x, 800, 5, size, selectedTile);
 
 				ctx.clearRect(0, 0, canvas.width, canvas.height);
@@ -113,8 +114,8 @@ async function display () {
 					if (selectedTile !== undefined) {
 						edeck.push(ehand.eject(selectedTile));
 						edeck.shuffle();
-						ehand.push(edeck.pop());
 						ehand.sort();
+						ehand.push(edeck.pop());
 					}
 				}
 			);

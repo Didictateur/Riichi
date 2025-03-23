@@ -23,7 +23,7 @@ export class Deck {
 			if (i < 4) { // famille
 				for (let j = 1; j < 10; j++) {
 					const tile = this.find(i, j) as NonNullable<Tile>;
-					tile.drawTile(ctx, posX, posY, size);
+					tile.drawTile(ctx, posX, posY, size, false, 0, false);
 					posX += (75 + xOffset) * size;
 				}
 				posX = x;
