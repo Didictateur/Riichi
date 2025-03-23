@@ -25,8 +25,6 @@ export function clickAction(
 	} else {
 		return -1;
 	}
-	let dx = 0;
-	let size = 0.6;
 	let xmin = 960 - buttons.filter(c => c[0]).length * 120;
 	let inside = 492 < y && y < 544;
 	let q = Math.floor((x - xmin) / 120);
@@ -34,7 +32,8 @@ export function clickAction(
 	if (
 		q >= 0 &&
 		q < buttons.filter(c => c[0]).length &&
-		r > 10
+		r > 10 &&
+		inside
 	) {
 		return buttons.filter(c => c[0])[q][1] as number;
 	}
@@ -113,7 +112,7 @@ function buttonPass(
 	button(ctx, x, y, r, w, h, "#FF9030");
 	ctx.fillStyle = "black";
 	ctx.font = "30px garamond";
-	ctx.fillText("Ignorer",x + w * 0.1, y + h/2 * 1.3);
+	ctx.fillText("Ignorer", x + w * 0.1, y + h/2 * 1.3);
 }
 
 function buttonPon(

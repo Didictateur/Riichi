@@ -8,12 +8,14 @@ export type mousePos = { x: number, y: number};
 
 export class Game {
 	private deck: Deck;
-	private hands: Array<Hand>;
+	private deadWall: Array<Tile> = [];
+	private hands: Array<Hand> = [];
 	private discards: Array<Array<Tile>>;
 	private lastDiscard: number|undefined;
 	private groups: Array<Array<Group>>;
 
 	// game values
+	private level: number;
 	private turn = 0;
 	private selectedTile: number|undefined = undefined;
 	private canCall: boolean = false;
@@ -38,19 +40,22 @@ export class Game {
 		cv: HTMLCanvasElement,
 		staticCtx: CanvasRenderingContext2D,
 		staticCv: HTMLCanvasElement,
-		red: boolean = false
+		red: boolean = false,
+		level: number = 0
 	) {
 		this.ctx = ctx;
 		this.cv = cv;
 		this.staticCtx = staticCtx;
 		this.staticCv = staticCv;
+		this.level = level;
 		this.deck = new Deck(red);
-		this.hands = [
-			this.deck.getRandomHand(),
-			this.deck.getRandomHand(),
-			this.deck.getRandomHand(),
-			this.deck.getRandomHand()
-		];
+		this.deck.shuffle();
+		for (let i = 0; i < 14; i++) {
+			this.deadWall.push(this.deck.pop());
+		}
+		for (let i = 0; i < 4; i++) {
+			this.hands.push(this.deck.getRandomHand());
+		}
 		this.discards = [[], [], [], []];
 		this.lastDiscard = undefined;
 		this.groups = [[], [], [], []];
@@ -93,9 +98,9 @@ export class Game {
 			mp.y,
 			this.canDoAChii().length > 0,
 			this.canDoAPon(),
-			false,
-			false,
-			false
+			false && this.level > 1,
+			false && this.level > 0,
+			false && this.level > 0
 		);
 		
 		if (this.canCall && action !== -1) { // can call
@@ -256,6 +261,9 @@ export class Game {
 		// update game
 		this.play();
 
+		// draw winds, discard, riichi etc...
+		this.drawDiscardSize();
+
 		// hands
 		this.drawHands();
 	
@@ -275,9 +283,9 @@ export class Game {
 			this.staticCtx,
 			this.canDoAChii().length > 0,
 			this.canDoAPon(),
-			false,
-			false,
-			false
+			false && this.level > 1,
+			false && this.level > 0,
+			false && this.level > 0
 		);
 	}
 
@@ -411,6 +419,12 @@ export class Game {
 		}
 
 		this.staticCtx.restore();
+	}
+
+	private drawDiscardSize() {
+		this.staticCtx.fillStyle = "#f070f0";
+		this.staticCtx.font = "40px garamond";
+		this.staticCtx.fillText(this.deck.length().toString(), 520, 520);
 	}
 
 	public async preload(): Promise<void> {
