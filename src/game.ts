@@ -107,7 +107,7 @@ export class Game {
 				} else {
 					this.turn++;
 				}
-				this.hasPicked = false;
+				this.hasPicked = true;
 				this.hasPlayed = false;
 			} else if (action == 2) { // pon
 				this.pon(this.turn);
@@ -152,6 +152,7 @@ export class Game {
 			this.turn !== 0
 		) { // bot playing
 			if (!this.hasPicked) { // begin of his turn
+				this.lastPlayed = Date.now();
 				this.pick(this.turn);
 				this.hasPicked = true;
 			} else if (!this.hasPlayed) { // middle of his turn
@@ -160,7 +161,7 @@ export class Game {
 					let n = Math.floor(this.hands[this.turn].length() * Math.random());
 					this.discard(this.turn, n);
 					this.hasPlayed = true;
-					this.canCall = this.canDoAPon();
+					this.canCall = this.canDoAChii().length > 0 || this.canDoAPon();
 				}
 			} else if (!this.canCall) { // end of his turn
 				if (this.turn === 3) {
@@ -191,33 +192,12 @@ export class Game {
 		this.lastPlayed = Date.now();
 	}
 
-	private canDoAPon(): boolean {
-		if (this.lastDiscard !== undefined && this.lastDiscard !== 0) {
-			let t = this.discards[this.lastDiscard][this.discards[this.lastDiscard].length-1];
-			return this.hands[0].count(t.getFamily(), t.getValue()) >= 2;
-		} else {
-			return false;
-		}
-	}
-
-	private pon(p: number): void {
-		let t = this.discards[p].pop() as NonNullable<Tile>;
-		this.lastDiscard = undefined;
-		let t2 = this.hands[0].find(t.getFamily(), t.getValue()) as NonNullable<Tile>;
-		let t3 = this.hands[0].find(t.getFamily(), t.getValue()) as NonNullable<Tile>;
-		[t, t2, t3].forEach(t => t.setTilt());
-		this.groups[0].push(new Group([t, t2, t3], p));
-
-		this.turn = 0;
-		this.hasPicked = true;
-		this.hasPlayed = false;
-	}
-
 	private canDoAChii(): Array<number> {
 		let chii = [] as Array<number>;
 		if (
 			this.lastDiscard !== undefined &&
 			this.lastDiscard === 3 &&
+			this.turn === 3 &&
 			this.discards[this.lastDiscard][this.discards[this.lastDiscard].length-1].getFamily() < 4
 		) {
 			let t = this.discards[this.lastDiscard][this.discards[this.lastDiscard].length-1];
@@ -244,6 +224,32 @@ export class Game {
 
 	private chii(minValue: number): void {
 		console.log("Chii !\n");
+	}
+
+	private canDoAPon(): boolean {
+		if (
+			this.lastDiscard !== undefined &&
+			this.lastDiscard !== 0 &&
+			this.turn !== 0
+		) {
+			let t = this.discards[this.lastDiscard][this.discards[this.lastDiscard].length-1];
+			return this.hands[0].count(t.getFamily(), t.getValue()) >= 2;
+		} else {
+			return false;
+		}
+	}
+
+	private pon(p: number): void {
+		let t = this.discards[p].pop() as NonNullable<Tile>;
+		this.lastDiscard = undefined;
+		let t2 = this.hands[0].find(t.getFamily(), t.getValue()) as NonNullable<Tile>;
+		let t3 = this.hands[0].find(t.getFamily(), t.getValue()) as NonNullable<Tile>;
+		[t, t2, t3].forEach(t => t.setTilt());
+		this.groups[0].push(new Group([t, t2, t3], p));
+
+		this.turn = 0;
+		this.hasPicked = true;
+		this.hasPlayed = false;
 	}
 
 	private drawGame(): void {
