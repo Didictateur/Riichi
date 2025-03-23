@@ -14,21 +14,31 @@ export function clickAction(
 	tsumo: boolean
 ): number {
 	let buttons = [
-		chii,
-		pon,
-		kan,
-		ron,
-		tsumo
+		[tsumo, 5],
+		[ron, 4],
+		[kan, 3],
+		[pon, 2],
+		[chii, 1]
 	]
-	if (buttons.some(c => c)) {
-		buttons.unshift(true);
+	if (buttons.some(c => c[0])) {
+		buttons.push([true, 0]);
 	} else {
 		return -1;
 	}
 	let dx = 0;
 	let size = 0.6;
-	let xmin = 1025 - buttons.filter(c => c).length * 3 * size;
-	console.log(x > xmin, "\n");
+	let xmin = 960 - buttons.filter(c => c[0]).length * 120;
+	let inside = 492 < y && y < 544;
+	let q = Math.floor((x - xmin) / 120);
+	let r = (x - xmin) - 120 * q;
+	if (
+		q >= 0 &&
+		q < buttons.filter(c => c[0]).length &&
+		r > 10
+	) {
+		return buttons.filter(c => c[0])[q][1] as number;
+	}
+	console.log(q, r, "\n");
 	return -1;
 }
 

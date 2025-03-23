@@ -97,24 +97,26 @@ export class Game {
 			false,
 			false
 		);
-		if (action === -1 && this.canCall) {
-			if (this.turn === 3) {
+		
+		if (this.canCall && action !== -1) { // can call
+			if (action === 0) { // pass
 				this.canCall = false;
-				this.turn = 0;
-				this.pick(0);
-			} else {
-				this.turn++;
+				if (this.turn === 3) {
+					this.turn = 0;
+					this.pick(0);
+				} else {
+					this.turn++;
+				}
+				this.hasPicked = false;
+				this.hasPlayed = false;
+			} else if (action == 2) { // pon
+				this.pon(this.turn);
 			}
-			this.hasPicked = false;
-			this.hasPlayed = false;
-		} else {
-			this.getSelected(mp);
+
+		} else { // nothing unusual
 			if (this.turn === 0 && this.selectedTile !== undefined) {
 				this.discard(0, this.selectedTile as NonNullable<number>);
 				this.turn++;
-			}
-			if (this.canDoAPon()) {
-				this.pon(this.turn > 0 ? this.turn-1 : 3);
 			}
 		}
 	}
@@ -199,13 +201,16 @@ export class Game {
 	}
 
 	private pon(p: number): void {
-		console.log("Pon !\n");
 		let t = this.discards[p].pop() as NonNullable<Tile>;
 		this.lastDiscard = undefined;
 		let t2 = this.hands[0].find(t.getFamily(), t.getValue()) as NonNullable<Tile>;
 		let t3 = this.hands[0].find(t.getFamily(), t.getValue()) as NonNullable<Tile>;
 		[t, t2, t3].forEach(t => t.setTilt());
 		this.groups[0].push(new Group([t, t2, t3], p));
+
+		this.turn = 0;
+		this.hasPicked = true;
+		this.hasPlayed = false;
 	}
 
 	private canDoAChii(): Array<number> {
