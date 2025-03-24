@@ -122,7 +122,10 @@ export class Game {
 		} else { // nothing unusual
 			if (this.turn === 0 && this.selectedTile !== undefined) {
 				this.discard(0, this.selectedTile as NonNullable<number>);
-				this.turn++;
+				this.checkPon();
+				console.log("turn", this.turn, "\n");
+				this.turn = (this.turn + 1) % 4;
+				console.log("new turn", this.turn, "\n");
 			}
 		}
 	}
@@ -157,6 +160,7 @@ export class Game {
 		if (
 			this.turn !== 0
 		) { // bot playing
+			console.log(this.turn, '\n');
 			if (!this.hasPicked) { // begin of his turn
 				this.lastPlayed = Date.now();
 				this.pick(this.turn);
@@ -167,6 +171,7 @@ export class Game {
 					let n = Math.floor(this.hands[this.turn].length() * Math.random());
 					this.discard(this.turn, n);
 					this.hasPlayed = true;
+					this.checkPon();
 					this.canCall = this.canDoAChii().length > 0 || this.canDoAPon();
 				}
 			} else if (!this.canCall) { // end of his turn
@@ -232,28 +237,39 @@ export class Game {
 		console.log("Chii !\n");
 	}
 
-	private canDoAPon(): boolean {
+	private checkPon(): void {
+		for (var p = 1; p < 4; p++) {
+			if (this.canDoAPon(p)) {
+				console.log(p, '\n');
+				this.pon(this.lastDiscard as NonNullable<number>, p);
+				break;
+			}
+		}
+	}
+
+	private canDoAPon(player: number = 0): boolean {
 		if (
 			this.lastDiscard !== undefined &&
-			this.lastDiscard !== 0 &&
-			this.turn !== 0
+			this.lastDiscard !== player &&
+			this.turn !== player
 		) {
 			let t = this.discards[this.lastDiscard][this.discards[this.lastDiscard].length-1];
-			return this.hands[0].count(t.getFamily(), t.getValue()) >= 2;
+			return this.hands[player].count(t.getFamily(), t.getValue()) >= 2;
 		} else {
 			return false;
 		}
 	}
 
-	private pon(p: number): void {
+	private pon(p: number, thief: number = 0): void {
+		console.log(thief, "stole", p, '\n');
 		let t = this.discards[p].pop() as NonNullable<Tile>;
 		this.lastDiscard = undefined;
-		let t2 = this.hands[0].find(t.getFamily(), t.getValue()) as NonNullable<Tile>;
-		let t3 = this.hands[0].find(t.getFamily(), t.getValue()) as NonNullable<Tile>;
+		let t2 = this.hands[thief].find(t.getFamily(), t.getValue()) as NonNullable<Tile>;
+		let t3 = this.hands[thief].find(t.getFamily(), t.getValue()) as NonNullable<Tile>;
 		[t, t2, t3].forEach(t => t.setTilt());
-		this.groups[0].push(new Group([t, t2, t3], p));
+		this.groups[thief].push(new Group([t, t2, t3], p, thief));
 
-		this.turn = 0;
+		this.turn = thief;
 		this.hasPicked = true;
 		this.hasPlayed = false;
 	}
@@ -310,7 +326,7 @@ export class Game {
 			5 * this.sizeHiddenHand,
 			this.sizeHiddenHand,
 			undefined,
-			true,
+			false,
 			- pi / 2
 		);
 		this.hands[2].drawHand(
@@ -320,7 +336,7 @@ export class Game {
 			5 * this.sizeHiddenHand,
 			this.sizeHiddenHand,
 			undefined,
-			true,
+			false,
 			- pi
 		);
 		this.hands[3].drawHand(
@@ -330,7 +346,7 @@ export class Game {
 			5 * this.sizeHiddenHand,
 			this.sizeHiddenHand,
 			undefined,
-			true,
+			false,
 			pi / 2
 		);
 

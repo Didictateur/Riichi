@@ -2,11 +2,17 @@ import { Tile } from "./tile"
 
 export class Group {
 	private tiles: Array<Tile>;
-	private stolenFrom: number|undefined;
+	private stolenFrom: number;
+	private belongsTo: number
 
-	public constructor(tiles: Array<Tile> = [], stolenFrom: number|undefined = undefined) {
+	public constructor(
+		tiles: Array<Tile>,
+		stolenFrom: number,
+		belongsTo: number
+	) {
 		this.tiles = tiles;
 		this.stolenFrom = stolenFrom;
+		this.belongsTo = belongsTo;
 	}
 
 	public push(tile: Tile): void {
@@ -29,21 +35,23 @@ export class Group {
 		size: number,
 		rotation: number,
 	): void {
+		ctx.save();
+		ctx.translate(525, 525);
+		ctx.rotate(rotation);
+		ctx.translate(-525, -525);
+		
+		console.log(x, y, '\n');
+
+		rotation = 0;
 		let v = 75 * size;
 		let w = 90 * size;
-		let vx = Math.cos(rotation);
-		let vy = Math.sin(rotation);
-		let osx = Math.sin(rotation) * 25 * size / 2;
-		let osy = Math.cos(rotation) * 25 * size / 2;
-		if (!this.stolenFrom) {
-			//TODO error
-		}
-		let p = 3 - (this.stolenFrom as NonNullable<number>);
+		let osy = 25 * size / 2;
+		let p = (this.belongsTo - this.stolenFrom - 1 + 4) % 4;
 		
 		if (p === 0) {
 			this.tiles[0].drawTile(
 				ctx,
-				x + osx,
+				x,
 				y + osy,
 				size,
 				false,
@@ -52,8 +60,8 @@ export class Group {
 			);
 			this.tiles[1].drawTile(
 				ctx,
-				x + vx * w,
-				y + vy * w,
+				x + w,
+				y,
 				size,
 				false,
 				0,
@@ -61,8 +69,8 @@ export class Group {
 			);
 			this.tiles[2].drawTile(
 				ctx,
-				x + vx * (w + v + os * size),
-				y + vy * (w + v + os * size),
+				x + w + v + os * size,
+				y,
 				size,
 				false,
 				0,
@@ -81,8 +89,8 @@ export class Group {
 			);
 			this.tiles[1].drawTile(
 				ctx,
-				x + vx * w + osx,
-				y + vy * w + osy,
+				x + w,
+				y + osy,
 				size,
 				false,
 				0 - 3.141592 / 2,
@@ -90,8 +98,8 @@ export class Group {
 			);
 			this.tiles[2].drawTile(
 				ctx,
-				x + vx * (w + v + 3 *os * size),
-				y + vy * (w + v + 3 *os * size),
+				x + w + v + 3 *os * size,
+				y,
 				size,
 				false,
 				0,
@@ -110,8 +118,8 @@ export class Group {
 			);
 			this.tiles[1].drawTile(
 				ctx,
-				x + vx * (v + os * size),
-				y + vy * (v + os * size),
+				x + v + os * size,
+				y,
 				size,
 				false,
 				0,
@@ -119,8 +127,8 @@ export class Group {
 			);
 			this.tiles[2].drawTile(
 				ctx,
-				x + vx * (w + v + os * size) + osx,
-				y + vy * (w + v + os * size) + osy,
+				x + w + v + os * size,
+				y + osy,
 				size,
 				false,
 				0 - 3.141592 / 2,
@@ -130,5 +138,7 @@ export class Group {
 		} else {
 			//TODO error
 		}
+
+		ctx.restore();
 	}
 }

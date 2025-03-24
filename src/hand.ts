@@ -97,7 +97,7 @@ export class Hand {
 				if (groups !== undefined) {
 					this.tiles.push(t1);
 					this.sort();
-					groups.push(new Group([t1, t2]));
+					groups.push(new Group([t1, t2], 0, 0));
 					return groups;
 				}
 			}
@@ -109,7 +109,7 @@ export class Hand {
 				this.tiles.push(t3);
 				this.sort();
 				if (groups !== undefined) {
-					groups.push(new Group([t1, t2, t3]));
+					groups.push(new Group([t1, t2, t3], 0, 0));
 					this.tiles.push(t1);
 					this.sort();
 					return groups;
@@ -126,7 +126,7 @@ export class Hand {
 				this.tiles.push(t3);
 				this.sort();
 				if (groups !== undefined) {
-					groups.push(new Group([t3, t2, t1]));
+					groups.push(new Group([t3, t2, t1], 0, 0));
 					this.tiles.push(t1);
 					this.sort();
 					return groups;
