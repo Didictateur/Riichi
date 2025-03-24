@@ -6,13 +6,13 @@ all:
 
 zip:
 	npx webpack --mode production
-	@rm -rf riichi_zip
-	mkdir riichi_zip
-	cp -r build riichi_zip
-	cp index.html riichi_zip
-	cp -r img riichi_zip
-	zip -r riichi.zip riichi_zip
-	@rm -r riichi_zip
+	@rm -rf riichi
+	mkdir riichi
+	cp -r build riichi
+	cp index.html riichi
+	cp -r img riichi
+	zip -r riichi.zip riichi
+	@rm -r riichi
 
 clean:
 	rm -rf build/

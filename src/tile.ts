@@ -112,7 +112,7 @@ export class Tile {
 	}
 
 	private setImgSrc(): void {
-		this.imgSrc = "/img/Regular/"
+		this.imgSrc = "img/Regular/"
 		if (this.family <= 3) {
 			this.imgSrc += ["", "Man", "Pin", "Sou"][this.family];
 			this.imgSrc += String(this.value);
@@ -129,10 +129,10 @@ export class Tile {
 
 	public async preloadImg(): Promise<void> {
 		await Promise.all([
-			this.loadImg(this.imgFront, "/img/Regular/Front.svg"),
-			// this.loadImg(this.imgFront, "/img/Export/Regular/Front.png"),
-			this.loadImg(this.imgBack, "/img/Regular/Back.svg"),
-			this.loadImg(this.imgGray, "/img/Regular/Gray.svg"),
+			this.loadImg(this.imgFront, "img/Regular/Front.svg"),
+			// this.loadImg(this.imgFront, "/~img/Export/Regular/Front.png"),
+			this.loadImg(this.imgBack, "img/Regular/Back.svg"),
+			this.loadImg(this.imgGray, "img/Regular/Gray.svg"),
 			this.loadImg(this.img, this.imgSrc)
 		]);
 	}
