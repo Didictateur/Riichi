@@ -93,9 +93,10 @@ export class Game {
 	public click(
 		mp: mousePos,
 	): void {
+		const rect = this.cv.getBoundingClientRect();
 		let action = clickAction(
-			mp.x,
-			mp.y,
+			mp.x - rect.left,
+			mp.y - rect.top,
 			this.canDoAChii().length > 0,
 			this.canDoAPon(),
 			false && this.level > 1,

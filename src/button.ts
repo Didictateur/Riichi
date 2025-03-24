@@ -26,7 +26,7 @@ export function clickAction(
 		return -1;
 	}
 	let xmin = 960 - buttons.filter(c => c[0]).length * 120;
-	let inside = 492 < y && y < 544;
+	let inside = 838 < y && y < 888;
 	let q = Math.floor((x - xmin) / 120);
 	let r = (x - xmin) - 120 * q;
 	if (
