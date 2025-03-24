@@ -5,4 +5,4 @@ all:
 	npx webpack --mode development
 
 clean:
-	rm -rf build/*
+	rm -rf build/
