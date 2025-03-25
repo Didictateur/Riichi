@@ -22,6 +22,7 @@ export class Game {
 	private hasPicked: boolean = false;
 	private hasPlayed: boolean = false;
 	private lastPlayed: number = Date.now();
+	private end: boolean = false;
 
 	// display parameter
 	private BG_RECT = {color: "#007730", x: 0, y: 0, w: 1050, h: 1050};
@@ -62,6 +63,10 @@ export class Game {
 
 		this.hands[0].sort();
 		this.pick(0);
+	}
+
+	public isFinished(): boolean {
+		return this.end;
 	}
 
 	public draw(mp: mousePos) {
@@ -171,8 +176,13 @@ export class Game {
 					let n = Math.floor(this.hands[this.turn].length() * Math.random());
 					this.discard(this.turn, n);
 					this.hasPlayed = true;
-					this.checkPon();
-					this.canCall = this.canDoAChii().length > 0 || this.canDoAPon();
+					if (this.deck.length() <= 0) {
+						this.end = true;
+					}
+					if (!this.isFinished()) {
+						this.checkPon();
+						this.canCall = this.canDoAChii().length > 0 || this.canDoAPon();
+					}
 				}
 			} else if (!this.canCall) { // end of his turn
 				if (this.turn === 3) {

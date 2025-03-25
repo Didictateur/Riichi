@@ -37,6 +37,7 @@ function drawFrame() {
 }
 
 function animationLoop(currentTime: number) {
+	if (!GAME?.isFinished()){
     animationFrameId = requestAnimationFrame(animationLoop);
 
     const deltaTime = currentTime - lastFrameTime;
@@ -44,6 +45,7 @@ function animationLoop(currentTime: number) {
 
     lastFrameTime = currentTime - (deltaTime % FRAME_INTERVAL);
     drawFrame();
+	}
 }
 
 function initEventListeners() {
