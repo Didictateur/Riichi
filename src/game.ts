@@ -3,6 +3,7 @@ import { Hand } from "./hand";
 import { Tile } from "./tile";
 import { Group } from "./group";
 import { drawButtons, clickAction } from "./button";
+import { drawState } from "./state";
 
 export type mousePos = { x: number, y: number};
 
@@ -289,6 +290,7 @@ export class Game {
 		this.play();
 
 		// draw winds, discard, riichi etc...
+		drawState(this.staticCtx, this.turn);
 		this.drawDiscardSize();
 
 		// hands
@@ -451,7 +453,7 @@ export class Game {
 	private drawDiscardSize() {
 		this.staticCtx.fillStyle = "#f070f0";
 		this.staticCtx.font = "40px garamond";
-		this.staticCtx.fillText(this.deck.length().toString(), 520, 520);
+		this.staticCtx.fillText(this.deck.length().toString(), 507, 537);
 	}
 
 	public async preload(): Promise<void> {
