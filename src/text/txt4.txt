@@ -1,0 +1,25 @@
+Voici votre *première partie* !
+Il est temps de mettre en oeuvre tout ce que vous avez appris.
+
+Il est cependant important de noter dorénavant une mécanique
+essentielle pour l'obtention de nouvelles tuiles:
+
+- Lorsqu'une personne défausse une tuile permettant à un joueur
+de compléter un *brelan*, il peut l'annoncer avec #ff00ff{Pon !} et la
+récupérer pour lui
+- Lorsque le joueur *précédent* défausse une tuile permettant au
+joueur de compléter une *suite*, il peut l'annoncer avec #ff00ff{Chii !} et
+de la même manière la récupérer pour lui
+
+#ff0000{Attention !}
+Cette action est appelée un #ff00ff{appel}. Ce dernier est *définitif* et est
+*visible par tout le monde*
+
+PS: si un joueur veut faire un *Chii* en même temps qu'un autre
+veut faire un *Pon*, alors le *Pon* a *toujours* la priorité
+
+
+
+
+
+~Il est maintenant tant de choisir une tuile à défausser !~

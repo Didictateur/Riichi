@@ -57,6 +57,10 @@
         .menu-item:hover .dropdown {
             display: block;
         }
+				.container {
+					display: flex;
+					justify-content: space-betwenne;
+				}
     </style>
 </head>
 <body>
@@ -108,10 +112,30 @@
 				</ul>
     </nav>
 
-		<div id="canvasContainer"></div>
+		<div class="container">
+			<div id="canvasContainer"></div>
+			<div id="anotherCanvasContainer"></div>
+		</div>
 
     <script>
 				let currentScript = null;
+				
+				function loadText(scriptName) {
+					if (window.cleanup) {
+						window.cleanup();
+					}
+
+					const container = document.getElementById("anotherCanvasContainer");
+					container.innerHTML = `<canvas id="myTextCanvas" width="1000" height="1000"></canvas>`;
+
+					const timestamp = new Date().getTime();
+
+					currentScript = document.createElement("script");
+					currentScript.type = "module";
+					currentScript.src = `build/${scriptName}?t=${timestamp}`;
+
+					document.body.appendChild(currentScript);
+				}
 
         function loadScript(scriptName) {
 					if (window.cleanup) {
@@ -128,6 +152,9 @@
 					currentScript.src = `build/${scriptName}?t=${timestamp}`;
 
 					document.body.appendChild(currentScript);
+
+					const number = scriptName.substring(2, scriptName.length - 3);
+					loadText("txt" + number + ".js");
 				}
 					
 				//script initial

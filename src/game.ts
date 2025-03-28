@@ -2,7 +2,7 @@ import { Deck } from "./deck";
 import { Hand } from "./hand";
 import { Tile } from "./tile";
 import { Group } from "./group";
-import { drawButtons, clickAction } from "./button";
+import { drawButtons, clickAction, drawChiis, clickChii } from "./button";
 import { drawState } from "./state";
 
 export type mousePos = { x: number, y: number};
@@ -23,6 +23,7 @@ export class Game {
 	private hasPicked: boolean = false;
 	private hasPlayed: boolean = false;
 	private lastPlayed: number = Date.now();
+	private chooseChii: boolean = false;
 	private end: boolean = false;
 
 	// display parameter
@@ -100,38 +101,59 @@ export class Game {
 		mp: mousePos,
 	): void {
 		const rect = this.cv.getBoundingClientRect();
-		let action = clickAction(
-			mp.x - rect.left,
-			mp.y - rect.top,
-			this.canDoAChii().length > 0,
-			this.canDoAPon(),
-			false && this.level > 1,
-			false && this.level > 0,
-			false && this.level > 0
-		);
-		
-		if (this.canCall && action !== -1) { // can call
-			if (action === 0) { // pass
-				this.canCall = false;
-				if (this.turn === 3) {
-					this.turn = 0;
-					this.pick(0);
-				} else {
-					this.turn++;
-				}
-				this.hasPicked = true;
-				this.hasPlayed = false;
-			} else if (action == 2) { // pon
-				this.pon(this.turn);
-			}
 
-		} else { // nothing unusual
-			if (this.turn === 0 && this.selectedTile !== undefined) {
-				this.discard(0, this.selectedTile as NonNullable<number>);
-				this.checkPon();
-				console.log("turn", this.turn, "\n");
-				this.turn = (this.turn + 1) % 4;
-				console.log("new turn", this.turn, "\n");
+		if (this.chooseChii) { // is choosing
+			let allChii = this.getChii(0);
+			let c = clickChii(
+				mp.x - rect.x,
+				mp.y - rect.y,
+				allChii
+			);	
+			console.log("chii action:", c, "\n");
+
+			if (c === 0) {
+				this.chooseChii = false;
+			}
+		} else {
+			let action = clickAction(
+				mp.x - rect.left,
+				mp.y - rect.top,
+				this.canDoAChii().length > 0,
+				this.canDoAPon(),
+				false && this.level > 1,
+				false && this.level > 0,
+				false && this.level > 0
+			);
+
+			if (this.canCall && action !== -1) { // can call
+				if (action === 0) { // pass
+					this.canCall = false;
+					if (this.turn === 3) {
+						this.turn = 0;
+						this.pick(0);
+					} else {
+						this.turn++;
+					}
+					this.hasPicked = true;
+					this.hasPlayed = false;
+				} else if (action === 1) { // chii
+					let chiis = this.canDoAChii();
+					if (chiis.length === 0) { // only one possible
+						this.chii(chiis[0], 0); // TODO not 0
+					} else {
+						this.chooseChii = true;
+						this.drawGame();
+					}
+				} else if (action == 2) { // pon
+					this.pon(this.turn);
+				}
+
+			} else { // nothing unusual
+				if (this.turn === 0 && this.selectedTile !== undefined) {
+					this.discard(0, this.selectedTile as NonNullable<number>);
+					this.checkPon();
+					this.turn = (this.turn + 1) % 4;
+				}
 			}
 		}
 	}
@@ -166,7 +188,6 @@ export class Game {
 		if (
 			this.turn !== 0
 		) { // bot playing
-			console.log(this.turn, '\n');
 			if (!this.hasPicked) { // begin of his turn
 				this.lastPlayed = Date.now();
 				this.pick(this.turn);
@@ -214,16 +235,16 @@ export class Game {
 		this.lastPlayed = Date.now();
 	}
 
-	private canDoAChii(): Array<number> {
+	private canDoAChii(p: number = 0): Array<number> {
 		let chii = [] as Array<number>;
 		if (
 			this.lastDiscard !== undefined &&
-			this.lastDiscard === 3 &&
-			this.turn === 3 &&
+			(this.lastDiscard + 1) % 4 === p &&
+			(this.turn + 1) % 4  === p &&
 			this.discards[this.lastDiscard][this.discards[this.lastDiscard].length-1].getFamily() < 4
 		) {
 			let t = this.discards[this.lastDiscard][this.discards[this.lastDiscard].length-1];
-			let h = this.hands[0];
+			let h = this.hands[p];
 			if (
 				h.count(t.getFamily(), t.getValue()-2) > 0 &&
 				h.count(t.getFamily(), t.getValue()-1) > 0
@@ -244,14 +265,57 @@ export class Game {
 		return chii;
 	}
 
-	private chii(minValue: number): void {
-		console.log("Chii !\n");
+	private chii(minValue: number, p: number): void {
+		let t = this.discards[p === 0 ? 3 : p - 1].pop() as NonNullable<Tile>;
+		this.lastDiscard = undefined;
+		let tn = 0;
+		let v = minValue;
+		let tt: Array<Tile> = [];
+		while (tn < 2) {
+			if (v === t.getValue()) {
+				v++;
+			} else {
+				tt[tn] = this.hands[p].find(t.getFamily(), v) as NonNullable<Tile>;
+				tn++;
+				v++;
+			}
+		}
+		[t, tt[0], tt[1]].forEach(t => t.setTilt());
+		this.groups[p].push(new Group([t, tt[0], tt[1]], p === 0 ? 3 : p - 1, p));
+
+		this.turn = p;
+		this.hasPicked = true;
+		this.hasPlayed = false;
+	}
+
+	private getChii(p: number): Array<Array<Tile>> {
+		let chiis = [] as Array<Array<Tile>>;
+		let numChii = this.canDoAChii();
+
+		let d = this.discards[p === 0 ? 3 : p - 1];
+		let t = d[d.length - 1]
+
+		for (let i = 0; i < numChii.length; i++) {
+			let v = numChii[i];
+			let chii = [];
+			for (let dv = 0; dv < 3; dv++) {
+				if (v + dv === t.getValue()) {
+					chii.push(t);
+				} else {
+					let tt = this.hands[p].find(t.getFamily(), v + dv) as NonNullable<Tile>;
+					chii.push(tt);
+					this.hands[p].push(tt);
+				}
+			}
+			chiis.push(chii);
+		}
+
+		return chiis;
 	}
 
 	private checkPon(): void {
 		for (var p = 1; p < 4; p++) {
 			if (this.canDoAPon(p)) {
-				console.log(p, '\n');
 				this.pon(this.lastDiscard as NonNullable<number>, p);
 				break;
 			}
@@ -272,7 +336,6 @@ export class Game {
 	}
 
 	private pon(p: number, thief: number = 0): void {
-		console.log(thief, "stole", p, '\n');
 		let t = this.discards[p].pop() as NonNullable<Tile>;
 		this.lastDiscard = undefined;
 		let t2 = this.hands[thief].find(t.getFamily(), t.getValue()) as NonNullable<Tile>;
@@ -308,14 +371,18 @@ export class Game {
 		}
 
 		// called
-		drawButtons(
-			this.staticCtx,
-			this.canDoAChii().length > 0,
-			this.canDoAPon(),
-			false && this.level > 1,
-			false && this.level > 0,
-			false && this.level > 0
-		);
+		if (this.chooseChii) {
+			drawChiis(this.staticCtx, this.getChii(0));
+		} else {
+			drawButtons(
+				this.staticCtx,
+				this.canDoAChii().length > 0,
+				this.canDoAPon(),
+				false && this.level > 1,
+				false && this.level > 0,
+				false && this.level > 0
+			);
+		}
 	}
 
 	private drawHands() {

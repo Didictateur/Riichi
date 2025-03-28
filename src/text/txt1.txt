@@ -1,0 +1,16 @@
+Le *Riichi Mahjong* est un jeu qui se joue avec des *tuiles*.
+Elles sont similaires aux cartes d'un jeu de Tarot dans la mesure
+où elles se divisent en deux catégories:
+
+- Les #ff00ff{familles}
+   Nous pouvons retrouver dans ce jeu *3* familles distinctes:
+   - Les *Man*, appelées les #ff00ff{Caractères}
+   - Les *Pin*, appelées les #ff00ff{Ronds}
+   - Les *Sou*, appelées les #ff00ff{Bambous}
+   Comme dans un jeu de cartes, ils sont tous numérotées
+   de *1* jusqu'à *9*.
+
+- Les #ff00ff{honneurs}
+   Ils sont séparés selon *2* catégories:
+   - Les *Dragons*: #ff0000{Rouge}, #ffffff{Blanc} et #00ff00{Vert}
+   - Les *Vents*: #0000e0{Est}, #0000e0{Sud}, #0000e0{Ouest} et #0000e0{Nord}

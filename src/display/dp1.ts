@@ -27,7 +27,7 @@ async function display() {
 			let x = 180;
 			let y = 80;
 			let size = 0.75;
-			let xos = 50;
+			let xos = 40;
 			let yos = 100;
 			const deck = new Deck(false);
 			await preloadDeck(deck);

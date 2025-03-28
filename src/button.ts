@@ -1,3 +1,5 @@
+import { Tile } from "./tile"
+
 type button_t = (
 	arg0: CanvasRenderingContext2D,
 	arg1: number,
@@ -37,7 +39,6 @@ export function clickAction(
 	) {
 		return buttons.filter(c => c[0])[q][1] as number;
 	}
-	console.log(q, r, "\n");
 	return -1;
 }
 
@@ -70,6 +71,66 @@ export function drawButtons(
 			dx++;
 		}
 	}
+}
+
+export function clickChii(
+	x: number,
+	y: number,
+	chiis: Array<Array<Tile>>
+): number {
+	let xmin = 960 - (chiis.length + 1) * 120;
+	let inside = 838 < y && y < 888;
+	let q = Math.floor((x - xmin) / 120);
+	let r = (x - xmin) - 120 * q;
+	if (
+		q >= 0 &&
+		q < (chiis.length + 1) &&
+		r > 10 &&
+		inside
+	) {
+		return q === chiis.length ? 0 : q + 1;
+	}
+	return -1;
+}
+
+export function drawChiis(
+	ctx: CanvasRenderingContext2D,
+	chiis: Array<Array<Tile>>
+): void {
+	const r = 8;
+	const w = 110;
+	const h = 50;
+	button(ctx, 850, 835, r, w, h, "#FF9030");
+	ctx.fillStyle = "black";
+	ctx.font = "30px garamond";
+	ctx.fillText("Retour", 850 + w * 0.1, 835 + h/2 * 1.3);
+	
+	let dx = 1;
+	console.log("length: ", chiis.length, "\n");
+	for (let i = 0; i < chiis.length; i++) {
+		console.log("trying to draw\n");
+		drawOneChii(
+			ctx,
+			850 - dx * 120,
+			835,
+			chiis[i]
+		);
+		dx++;
+	}
+}
+
+function drawOneChii(
+	ctx: CanvasRenderingContext2D,
+	x: number,
+	y: number,
+	tiles: Array<Tile>
+): void {
+	const r = 8;
+	const w = 110;
+	const h = 50;
+	button(ctx, x, y, r, w, h, "#FFCC33");
+	ctx.fillStyle = "black";
+	ctx.font = "30px garamond";
 }
 
 function button(
