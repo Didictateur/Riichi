@@ -1,0 +1,27 @@
+Bienvenu sur ce site dédié au *Mahjong* !
+
+Ce site est principalement destiné aux personnes découvrant ce
+formidable jeu.
+
+De nombreux services sont proposés:
+
+- *Introduction riichi majhong* dans l'onglet #ff00ff{Riichi Mahjong}
+
+- *Explication d'une partie en physique* dans l'onglet #ff00ff{Partie
+  réelle} pour comprendre comment y jouer dans la vraie vie
+
+- *Introduction à une variante* dans l'onglet #ff00ff{Riichi à trois}
+
+- *Un entrainement aux différents Yakus* dans l'onglet #ff00ff{Yaku
+  trainer}
+
+- *Une introduction au MCR*, la variante chinoise dans l'onglet
+  #ff00ff{MCR}
+
+
+
+
+Evidemment, ce site n'est pas encore fini, et possède encore
+beaucoup de problème. Pour le moindre retour, ne pas hésiter
+à le faire savoir directement sur le Github pour pour aider
+à l'améliorer.
