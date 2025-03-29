@@ -565,20 +565,20 @@ export class Game {
 	}
 
 	private drawResult(): void {
+		if (this.result !== -1) {
+			this.staticCtx.fillStyle = "#e0e0f0";
+			this.staticCtx.fillRect(450, 430, 150, 190);
+			this.staticCtx.fillRect(430, 450, 190, 150);
+			this.staticCtx.fillStyle = "#ff0000";
+			this.staticCtx.font = "45px garamond";
+
+		}
 		if (this.result === 0) { // Égalité
-			this.staticCtx.fillStyle = "#e0e0f0";
-			this.staticCtx.fillRect(450, 430, 150, 190);
-			this.staticCtx.fillRect(430, 450, 190, 150);
-			this.staticCtx.fillStyle = "#ff0000";
-			this.staticCtx.font = "45px garamond";
-			this.staticCtx.fillText("Égalité...", 450, 535);
+			this.staticCtx.fillText("Égalité", 450, 535);
 		} else if (this.result === 1) { // victoire
-			this.staticCtx.fillStyle = "#e0e0f0";
-			this.staticCtx.fillRect(450, 430, 150, 190);
-			this.staticCtx.fillRect(430, 450, 190, 150);
-			this.staticCtx.fillStyle = "#ff0000";
-			this.staticCtx.font = "45px garamond";
 			this.staticCtx.fillText("Victoire !", 440, 535);
+		} else if (this.result === 2) { // Défaite
+			this.staticCtx.fillText("Défaite...", 440, 535);
 		}
 	}
 
