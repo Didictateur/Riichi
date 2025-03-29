@@ -103,7 +103,10 @@ export class Game {
 	): void {
 		const rect = this.cv.getBoundingClientRect();
 
-		if (this.chooseChii) { // is choosing
+		if (this.hasWin(0)) {
+			this.end = true;
+			this.result = 1;
+		} else if (this.chooseChii) { // is choosing
 			let allChii = this.getChii(0);
 			let c = clickChii(
 				mp.x - rect.x,
@@ -193,14 +196,17 @@ export class Game {
 
 	private play(): void {
 		if (
-			this.turn !== 0
+			this.turn !== 0 && !this.end
 		) { // bot playing
 			if (!this.hasPicked) { // begin of his turn
 				this.lastPlayed = Date.now();
 				this.pick(this.turn);
 				this.hasPicked = true;
 			} else if (!this.hasPlayed) { // middle of his turn
-				if (Date.now() - this.lastPlayed > 700) {
+				if (this.hasWin(this.turn)) {
+					this.end = true;
+					this.result = 2;
+				} else if (Date.now() - this.lastPlayed > 700) {
 					this.lastPlayed = Date.now();
 					let n = Math.floor(this.hands[this.turn].length() * Math.random());
 					this.discard(this.turn, n);
@@ -299,6 +305,11 @@ export class Game {
 		[t, tt[0], tt[1]].forEach(t => t.setTilt());
 		this.groups[p].push(new Group([t, tt[0], tt[1]], p === 0 ? 3 : p - 1, p));
 
+		if (this.hasWin(p)) {
+			this.end = true;
+			this.result = p === 0 ? 1 : 2;
+		}
+
 		this.turn = p;
 		this.hasPicked = true;
 		this.hasPlayed = false;
@@ -359,9 +370,18 @@ export class Game {
 		[t, t2, t3].forEach(t => t.setTilt());
 		this.groups[thief].push(new Group([t, t2, t3], p, thief));
 
+		if (this.hasWin(thief)) {
+			this.end = true;
+			this.result = thief === 0 ? 1 : 2;
+		}
+
 		this.turn = thief;
 		this.hasPicked = true;
 		this.hasPlayed = false;
+	}
+
+	private hasWin(p: number): boolean {
+		return this.hands[p].toGroup() !== undefined
 	}
 
 	private drawGame(): void {
@@ -406,7 +426,7 @@ export class Game {
 
 	private drawHands() {
 		const pi = 3.141592;
-		const showHands = true;
+		const showHands = false;
 		
 		this.hands[0].drawHand(
 			this.staticCtx,
@@ -545,12 +565,20 @@ export class Game {
 	}
 
 	private drawResult(): void {
-		if (this.result === 0) {
+		if (this.result === 0) { // Égalité
 			this.staticCtx.fillStyle = "#e0e0f0";
-			this.staticCtx.fillRect(500, 500, 50, 50);
+			this.staticCtx.fillRect(450, 430, 150, 190);
+			this.staticCtx.fillRect(430, 450, 190, 150);
 			this.staticCtx.fillStyle = "#ff0000";
-			this.staticCtx.font = "35px garamond";
-			this.staticCtx.fillText("Égalité!", 475, 535);
+			this.staticCtx.font = "45px garamond";
+			this.staticCtx.fillText("Égalité...", 450, 535);
+		} else if (this.result === 1) { // victoire
+			this.staticCtx.fillStyle = "#e0e0f0";
+			this.staticCtx.fillRect(450, 430, 150, 190);
+			this.staticCtx.fillRect(430, 450, 190, 150);
+			this.staticCtx.fillStyle = "#ff0000";
+			this.staticCtx.font = "45px garamond";
+			this.staticCtx.fillText("Victoire !", 440, 535);
 		}
 	}
 

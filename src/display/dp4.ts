@@ -37,15 +37,13 @@ function drawFrame() {
 }
 
 function animationLoop(currentTime: number) {
-	if (!GAME?.isFinished()){
-    animationFrameId = requestAnimationFrame(animationLoop);
+  animationFrameId = requestAnimationFrame(animationLoop);
 
-    const deltaTime = currentTime - lastFrameTime;
-    if (deltaTime < FRAME_INTERVAL) return;
+   const deltaTime = currentTime - lastFrameTime;
+   if (deltaTime < FRAME_INTERVAL) return;
 
-    lastFrameTime = currentTime - (deltaTime % FRAME_INTERVAL);
-    drawFrame();
-	}
+   lastFrameTime = currentTime - (deltaTime % FRAME_INTERVAL);
+   drawFrame();
 }
 
 function initEventListeners() {
