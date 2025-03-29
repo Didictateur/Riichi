@@ -25,6 +25,7 @@ export class Game {
 	private lastPlayed: number = Date.now();
 	private chooseChii: boolean = false;
 	private end: boolean = false;
+	private result: number = -1;
 
 	// display parameter
 	private BG_RECT = {color: "#007730", x: 0, y: 0, w: 1050, h: 1050};
@@ -67,10 +68,6 @@ export class Game {
 		this.pick(0);
 	}
 
-	public isFinished(): boolean {
-		return this.end;
-	}
-
 	public draw(mp: mousePos) {
 		// background
 		this.staticCtx.clearRect(0, 0, this.cv.width, this.cv.height);
@@ -95,6 +92,10 @@ export class Game {
 
 	public getHands(): Array<Hand> {
 		return this.hands;
+	}
+
+	public isFinished(): boolean {
+		return this.end;
 	}
 
 	public click(
@@ -205,9 +206,10 @@ export class Game {
 					this.discard(this.turn, n);
 					this.hasPlayed = true;
 					if (this.deck.length() <= 0) {
+						this.result = 0;
 						this.end = true;
 					}
-					if (!this.isFinished()) {
+					if (!this.end) {
 						this.checkPon();
 						if (this.turn !== 3 && this.canDoAChii(this.turn + 1).length > 0) {
 							let chiis = this.canDoAChii(this.turn + 1);
@@ -369,6 +371,9 @@ export class Game {
 		// draw winds, discard, riichi etc...
 		drawState(this.staticCtx, this.turn);
 		this.drawDiscardSize();
+
+		// draw result
+		this.drawResult();
 
 		// hands
 		this.drawHands();
@@ -534,8 +539,19 @@ export class Game {
 
 	private drawDiscardSize() {
 		this.staticCtx.fillStyle = "#f070f0";
+
 		this.staticCtx.font = "40px garamond";
 		this.staticCtx.fillText(this.deck.length().toString(), 507, 537);
+	}
+
+	private drawResult(): void {
+		if (this.result === 0) {
+			this.staticCtx.fillStyle = "#e0e0f0";
+			this.staticCtx.fillRect(500, 500, 50, 50);
+			this.staticCtx.fillStyle = "#ff0000";
+			this.staticCtx.font = "35px garamond";
+			this.staticCtx.fillText("Égalité!", 475, 535);
+		}
 	}
 
 	public async preload(): Promise<void> {
