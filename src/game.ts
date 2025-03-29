@@ -153,6 +153,11 @@ export class Game {
 				if (this.turn === 0 && this.selectedTile !== undefined) {
 					this.discard(0, this.selectedTile as NonNullable<number>);
 					this.checkPon();
+					let chiis = this.canDoAChii(1);
+					if (chiis.length > 0) {
+						let i = Math.floor(Math.random() * chiis.length);
+						this.chii(chiis[i], 1);
+					}
 					this.turn = (this.turn + 1) % 4;
 				}
 			}
@@ -204,6 +209,11 @@ export class Game {
 					}
 					if (!this.isFinished()) {
 						this.checkPon();
+						if (this.turn !== 3 && this.canDoAChii(this.turn + 1).length > 0) {
+							let chiis = this.canDoAChii(this.turn + 1);
+							let i = Math.floor(Math.random() * chiis.length);
+							this.chii(chiis[i], this.turn + 1);
+						}
 						this.canCall = this.canDoAChii().length > 0 || this.canDoAPon();
 					}
 				}
@@ -391,6 +401,7 @@ export class Game {
 
 	private drawHands() {
 		const pi = 3.141592;
+		const showHands = true;
 		
 		this.hands[0].drawHand(
 			this.staticCtx,
@@ -409,7 +420,7 @@ export class Game {
 			5 * this.sizeHiddenHand,
 			this.sizeHiddenHand,
 			undefined,
-			true,
+			!showHands,
 			- pi / 2
 		);
 		this.hands[2].drawHand(
@@ -419,7 +430,7 @@ export class Game {
 			5 * this.sizeHiddenHand,
 			this.sizeHiddenHand,
 			undefined,
-			true,
+			!showHands,
 			- pi
 		);
 		this.hands[3].drawHand(
@@ -429,7 +440,7 @@ export class Game {
 			5 * this.sizeHiddenHand,
 			this.sizeHiddenHand,
 			undefined,
-			true,
+			!showHands,
 			pi / 2
 		);
 
