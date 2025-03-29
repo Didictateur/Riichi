@@ -88,7 +88,7 @@ export function clickChii(
 		r > 10 &&
 		inside
 	) {
-		return q === chiis.length ? 0 : q + 1;
+		return q === chiis.length ? 0 : chiis[q][0].getValue();
 	}
 	return -1;
 }
@@ -97,6 +97,7 @@ export function drawChiis(
 	ctx: CanvasRenderingContext2D,
 	chiis: Array<Array<Tile>>
 ): void {
+	chiis.reverse();
 	const r = 8;
 	const w = 110;
 	const h = 50;
@@ -106,9 +107,7 @@ export function drawChiis(
 	ctx.fillText("Retour", 850 + w * 0.1, 835 + h/2 * 1.3);
 	
 	let dx = 1;
-	console.log("length: ", chiis.length, "\n");
 	for (let i = 0; i < chiis.length; i++) {
-		console.log("trying to draw\n");
 		drawOneChii(
 			ctx,
 			850 - dx * 120,
@@ -128,9 +127,40 @@ function drawOneChii(
 	const r = 8;
 	const w = 110;
 	const h = 50;
+	const dx = 32;
+	const x0 = x + 7;
+	const y0 = y + 5;
 	button(ctx, x, y, r, w, h, "#FFCC33");
-	ctx.fillStyle = "black";
-	ctx.font = "30px garamond";
+	tiles[0].drawTile(
+		ctx,
+		x0,
+		y0,
+		0.4,
+		false,
+		0,
+		false,
+		false
+	);
+	tiles[1].drawTile(
+		ctx,
+		x0 + dx,
+		y0,
+		0.4,
+		false,
+		0,
+		false,
+		false
+	);
+	tiles[2].drawTile(
+		ctx,
+		x0 + 2 * dx,
+		y0,
+		0.4,
+		false,
+		0,
+		false,
+		false
+	);
 }
 
 function button(

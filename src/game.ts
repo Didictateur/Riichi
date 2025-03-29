@@ -109,10 +109,11 @@ export class Game {
 				mp.y - rect.y,
 				allChii
 			);	
-			console.log("chii action:", c, "\n");
-
 			if (c === 0) {
 				this.chooseChii = false;
+			} else {
+				this.chooseChii = false;
+				this.chii(c, 0);
 			}
 		} else {
 			let action = clickAction(
@@ -138,8 +139,8 @@ export class Game {
 					this.hasPlayed = false;
 				} else if (action === 1) { // chii
 					let chiis = this.canDoAChii();
-					if (chiis.length === 0) { // only one possible
-						this.chii(chiis[0], 0); // TODO not 0
+					if (chiis.length === 1) { // only one possible
+						this.chii(chiis[0], 0);
 					} else {
 						this.chooseChii = true;
 						this.drawGame();
@@ -250,18 +251,21 @@ export class Game {
 				h.count(t.getFamily(), t.getValue()-1) > 0
 			) {
 				chii.push(t.getValue()-2);
-			} else if (
+			}
+			if (
 				h.count(t.getFamily(), t.getValue()-1) > 0 &&
 				h.count(t.getFamily(), t.getValue()+1) > 0
 			) {
 				chii.push(t.getValue()-1);
-			} else if (
+			}
+			if (
 				h.count(t.getFamily(), t.getValue()+1) > 0 &&
 				h.count(t.getFamily(), t.getValue()+2) > 0
 			) {
 				chii.push(t.getValue());
 			}
 		}
+		console.log(chii, "\n");
 		return chii;
 	}
 
@@ -305,11 +309,11 @@ export class Game {
 					let tt = this.hands[p].find(t.getFamily(), v + dv) as NonNullable<Tile>;
 					chii.push(tt);
 					this.hands[p].push(tt);
+					this.hands[p].sort();
 				}
 			}
 			chiis.push(chii);
 		}
-
 		return chiis;
 	}
 
@@ -405,7 +409,7 @@ export class Game {
 			5 * this.sizeHiddenHand,
 			this.sizeHiddenHand,
 			undefined,
-			false,
+			true,
 			- pi / 2
 		);
 		this.hands[2].drawHand(
@@ -415,7 +419,7 @@ export class Game {
 			5 * this.sizeHiddenHand,
 			this.sizeHiddenHand,
 			undefined,
-			false,
+			true,
 			- pi
 		);
 		this.hands[3].drawHand(
@@ -425,7 +429,7 @@ export class Game {
 			5 * this.sizeHiddenHand,
 			this.sizeHiddenHand,
 			undefined,
-			false,
+			true,
 			pi / 2
 		);
 

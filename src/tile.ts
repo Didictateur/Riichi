@@ -49,11 +49,14 @@ export class Tile {
 		size: number,
 		hidden: boolean = false,
 		rotation: number = 0,
-		gray: boolean = false
+		gray: boolean = false,
+		tilted: boolean = true
 	): void {
 		ctx.save();
 		ctx.translate(x + (75 * size) / 2, y + (100 * size) / 2);
-		ctx.rotate(rotation + this.tilt);
+		if (tilted) {
+			ctx.rotate(rotation + this.tilt);
+		}
 
 		if (hidden) {
 			ctx.drawImage(
