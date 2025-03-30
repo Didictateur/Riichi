@@ -229,6 +229,10 @@ export class Game {
 				if (this.turn === 3) {
 					this.turn = 0;
 					this.pick(0);
+					if (this.hasWin(0)) {
+						this.end = true;
+						this.result = 1;
+					}
 				} else {
 					this.turn++;
 				}
