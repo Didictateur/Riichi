@@ -283,7 +283,6 @@ export class Game {
 				chii.push(t.getValue());
 			}
 		}
-		console.log(chii, "\n");
 		return chii;
 	}
 
@@ -472,7 +471,7 @@ export class Game {
 	}
 
 	private drawGroups(
-		size: number
+		size: number,
 	): void {
 		let os = 25;
 		const pi = 3.141592;
@@ -486,7 +485,8 @@ export class Game {
 						1050 - 62,
 						5,
 						0.6,
-						rotation
+						rotation,
+						this.hands[0].get(this.selectedTile)
 					);
 				}
 			}

@@ -34,20 +34,22 @@ export class Group {
 		os: number,
 		size: number,
 		rotation: number,
+		selectedTile: Tile|undefined
 	): void {
 		ctx.save();
 		ctx.translate(525, 525);
 		ctx.rotate(rotation);
 		ctx.translate(-525, -525);
 		
-		console.log(x, y, '\n');
-
 		rotation = 0;
 		let v = 75 * size;
 		let w = 90 * size;
 		let osy = 25 * size / 2;
 		let p = (this.belongsTo - this.stolenFrom - 1 + 4) % 4;
-		
+
+		const sf = selectedTile === undefined ? -1 : selectedTile.getFamily();
+		const sv = selectedTile === undefined ? 0 : selectedTile.getValue();
+
 		if (p === 0) {
 			this.tiles[0].drawTile(
 				ctx,
@@ -56,7 +58,7 @@ export class Group {
 				size,
 				false,
 				3.141592 / 2,
-				false
+				this.tiles[0].isEqual(sf, sv),
 			);
 			this.tiles[1].drawTile(
 				ctx,
@@ -65,7 +67,7 @@ export class Group {
 				size,
 				false,
 				0,
-				false
+				this.tiles[1].isEqual(sf, sv),
 			);
 			this.tiles[2].drawTile(
 				ctx,
@@ -74,7 +76,7 @@ export class Group {
 				size,
 				false,
 				0,
-				false
+				this.tiles[2].isEqual(sf, sv),
 			);
 		
 		} else if (p === 1) {
@@ -85,7 +87,7 @@ export class Group {
 				size,
 				false,
 				0,
-				false
+				this.tiles[0].isEqual(sf, sv),
 			);
 			this.tiles[1].drawTile(
 				ctx,
@@ -94,7 +96,7 @@ export class Group {
 				size,
 				false,
 				0 - 3.141592 / 2,
-				false
+				this.tiles[1].isEqual(sf, sv),
 			);
 			this.tiles[2].drawTile(
 				ctx,
@@ -103,7 +105,7 @@ export class Group {
 				size,
 				false,
 				0,
-				false
+				this.tiles[2].isEqual(sf, sv),
 			);
 		
 		} else if (p === 2) {
@@ -114,7 +116,7 @@ export class Group {
 				size,
 				false,
 				0,
-				false
+				this.tiles[0].isEqual(sf, sv),
 			);
 			this.tiles[1].drawTile(
 				ctx,
@@ -123,7 +125,7 @@ export class Group {
 				size,
 				false,
 				0,
-				false
+				this.tiles[1].isEqual(sf, sv),
 			);
 			this.tiles[2].drawTile(
 				ctx,
@@ -132,7 +134,7 @@ export class Group {
 				size,
 				false,
 				0 - 3.141592 / 2,
-				false
+				this.tiles[2].isEqual(sf, sv),
 			);
 
 		} else {
