@@ -59,27 +59,42 @@ export class Tile {
 		}
 
 		if (hidden) {
-			ctx.drawImage(
+			ctx.drawImage( // ombre
+				this.imgGray,
+				-(75 * size * 0.92) / 2,
+				-(100 * size * 0.91) / 2,
+				75 * size,
+				100 * size
+			);
+			ctx.drawImage( // le dos des tuiles
 				this.imgBack,
-				-(75 * size) / 2,
-				-(100 * size) / 2,
-				75 * size, 100 * size
-			);
-		} else {
-			ctx.drawImage(
-				this.imgFront,
-				-(75 * size) / 2,
-				-(100 * size) / 2,
-				75 * size, 100 * size
-			);
-			ctx.drawImage(
-				this.img,
 				-(75 * size) / 2,
 				-(100 * size) / 2,
 				75 * size,
 				100 * size
 			);
-			if (gray) {
+		} else {
+			ctx.drawImage( // ombre
+				this.imgGray,
+				-(75 * size * 0.92) / 2,
+				-(100 * size * 0.91) / 2,
+				75 * size,
+				100 * size
+			);
+			ctx.drawImage( // tuile à vide
+				this.imgFront,
+				-(75 * size) / 2,
+				-(100 * size) / 2,
+				75 * size, 100 * size
+			);
+			ctx.drawImage( // le dessin sur la tuile
+				this.img,
+				-((75 - 7) * size) / 2,
+				-((100 - 10) * size) / 2,
+				75 * size * 0.9,
+				100 * size * 0.9
+			);
+			if (gray) { // grisé
 				ctx.drawImage(
 					this.imgGray,
 					-(75 * size) / 2,
