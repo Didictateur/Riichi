@@ -139,7 +139,7 @@
 					document.body.appendChild(currentScript);
 				}
 
-        function loadScript(scriptName) {
+        function loadScript(scriptName, txt = true) {
 					if (window.cleanup) {
 						window.cleanup();
 					}
@@ -155,10 +155,15 @@
 
 					document.body.appendChild(currentScript);
 
-					const number = scriptName.substring(2, scriptName.length - 3);
-					loadText("txt" + number + ".js");
+					if (txt) {
+						const number = scriptName.substring(2, scriptName.length - 3);
+						loadText("txt" + number + ".js");
+					}
 				}
 					
+				//tests
+				loadScript('test_yakus.js', false);
+
 				//script initial
 				loadScript('dp5.js');
     </script>

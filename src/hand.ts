@@ -23,6 +23,10 @@ export class Hand {
 		}
 	}
 
+	public getTiles(): Array<Tile> {
+		return this.tiles;
+	}
+
 	public length(): number {
 		return this.tiles.length;
 	}

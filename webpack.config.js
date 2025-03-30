@@ -5,8 +5,10 @@ const fs = require('fs');
 function getEntryPoints() {
   const displayDir = path.resolve(__dirname, 'src', 'display');
 	const textDir = path.resolve(__dirname, 'src', 'text');
+	const testDir = path.resolve(__dirname, 'src', 'tests');
   const files = fs.readdirSync(displayDir); // Lire les fichiers du répertoire
 	const texts = fs.readdirSync(textDir);
+	const tests = fs.readdirSync(testDir);
   const entryPoints = {};
 
   files.forEach((file) => {
@@ -19,6 +21,12 @@ function getEntryPoints() {
 		if (file.startsWith('txt') && file.endsWith('.ts')) {
 			const name = path.basename(file, '.ts');
 			entryPoints[name] = path.join(textDir, file);
+		}
+	});
+	tests.forEach((file) => {
+		if (file.startsWith('test') && file.endsWith('.ts')) {
+			const name = path.basename(file, '.ts');
+			entryPoints[name] = path.join(testDir, file);
 		}
 	});
 

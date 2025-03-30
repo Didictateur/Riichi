@@ -27,6 +27,14 @@ export class Group {
 		return this.tiles;
 	}
 
+	public compare(g: Group): number {
+		let c = this.tiles[0].compare(g.tiles[0]);
+		if (c !== 0) {
+			return c;
+		}
+		return this.tiles[1].compare(g.tiles[1]);
+	} 
+
 	public drawGroup(
 		ctx: CanvasRenderingContext2D,
 		x: number,

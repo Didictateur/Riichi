@@ -1,3 +1,5 @@
+TESTS = $(wildcard build/test*)
+
 all:
 	npx webpack --mode development
 

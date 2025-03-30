@@ -38,6 +38,20 @@ export class Tile {
 		return this.red;
 	}
 
+	public compare(t: Tile): number {
+		if (this.family < t.family) {
+			return -1;
+		} else if (this.family > t.family) {
+			return 1;
+		}
+		if (this.value < t.value) {
+			return -1;
+		} else if (this.value > t.value) {
+			return 1;
+		}
+		return 0;
+	}
+
 	public setTilt(): void {
 		this.tilt = (1 - 2 * Math.random()) * 0.04;
 	}
