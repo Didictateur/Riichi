@@ -18,6 +18,9 @@ export class Game {
 	// game values
 	private level: number;
 	private turn = 0;
+	private minWaitingTime = 500;
+	private maxWaitingTime = 2000;
+	private waitingTime = 700;
 	private selectedTile: number|undefined = undefined;
 	private canCall: boolean = false;
 	private hasPicked: boolean = false;
@@ -139,6 +142,7 @@ export class Game {
 					} else {
 						this.turn++;
 					}
+					this.updateWaitingTime();
 					this.hasPicked = false;
 					this.hasPlayed = false;
 				} else if (action === 1) { // chii
@@ -162,6 +166,7 @@ export class Game {
 							let i = Math.floor(Math.random() * chiis.length);
 							this.chii(chiis[i], 1);
 						} else {
+							this.updateWaitingTime();
 							this.turn = (this.turn + 1) % 4;
 						}
 					}
@@ -196,6 +201,15 @@ export class Game {
 		}
 	};
 
+	private updateWaitingTime(): void {
+		this.waitingTime = 
+			Math.floor(
+				Math.random() *
+				(this.maxWaitingTime - this.minWaitingTime) +
+				this.minWaitingTime
+			);
+	}
+
 	private play(): void {
 		if (
 			this.turn !== 0 && !this.end
@@ -208,7 +222,7 @@ export class Game {
 				if (this.hasWin(this.turn)) {
 					this.end = true;
 					this.result = 2;
-				} else if (Date.now() - this.lastPlayed > 700) {
+				} else if (Date.now() - this.lastPlayed > this.waitingTime) {
 					this.lastPlayed = Date.now();
 					let n = Math.floor(this.hands[this.turn].length() * Math.random());
 					this.discard(this.turn, n);
@@ -238,6 +252,7 @@ export class Game {
 				} else {
 					this.turn++;
 				}
+				this.updateWaitingTime();
 				this.hasPicked = false;
 				this.hasPlayed = false;
 			}
@@ -314,7 +329,7 @@ export class Game {
 			this.end = true;
 			this.result = p === 0 ? 1 : 2;
 		}
-
+		this.updateWaitingTime();
 		this.turn = p;
 		this.hasPicked = true;
 		this.hasPlayed = false;
@@ -381,7 +396,7 @@ export class Game {
 			this.end = true;
 			this.result = thief === 0 ? 1 : 2;
 		}
-
+		this.updateWaitingTime();
 		this.turn = thief;
 		this.hasPicked = true;
 		this.hasPlayed = false;

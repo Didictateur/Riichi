@@ -3,7 +3,11 @@ Bienvenu sur ce site dédié au *Mahjong* !
 Ce site est principalement destiné aux personnes découvrant ce
 formidable jeu.
 
-De nombreux services sont proposés:
+Le nombre de chapitre de chaque section peut faire peur aux
+premiers abords, mais chacun deux n'est pas plus long que ce
+même texte
+
+Cependant, de nombreux services y sont proposés:
 
 - *Introduction riichi majhong* dans l'onglet #ff00ff{Riichi Mahjong}
 
@@ -17,8 +21,6 @@ De nombreux services sont proposés:
 
 - *Une introduction au MCR*, la variante chinoise dans l'onglet
   #ff00ff{MCR}
-
-
 
 
 Evidemment, ce site n'est pas encore fini, et possède encore

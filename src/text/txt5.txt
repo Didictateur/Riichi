@@ -1,0 +1,27 @@
+Nous avons appris jusque là que pour annoncer un *Chii*, il
+fallait nécessairement que cela se fasse via le joueur précédent.
+
+Il existe cependant une exception: *s'il ne nous manque plus
+qu'une seule tuile*. Dans ce cas précis, nous disons que le
+joueur est en #ff00ff{Tenpai} (il n'est pas obligé de retenir ce terme pour
+jouer). À ce moment là, #ff0000{qui que ce soit} qui défausse une tuile,
+un joueur en *Tenpai* peut la récupérer directement si elle lui
+donne la victoire
+
+Il y a alors deux situations possibles:
+- Le joueur en *Tenpai* pioche une tuile qui le fait gagner. Il
+l'annonce alors  avec #ff00ff{Tsumo !}
+- Le joueur en *Tenpai* gagne sur la défausse d'un autre joueur.
+Il l'annonce alors avec #ff00ff{Ron !}
+
+Par la suite, un nouveau bouton apparaitra pour permettre au
+joueur d'annoncer sa victoire. Le plus important à retenir,
+c'est que *Pon* et *Tsumo* signifie la victoire
+
+
+
+
+
+~Dans l'exemple ci-contre, le joueur peut annoncer sa victoire
+avec *Ron* sur la défausse du joueur d'en face en complétant
+un *Chii*~

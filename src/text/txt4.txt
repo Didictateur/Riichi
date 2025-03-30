@@ -22,4 +22,4 @@ veut faire un *Pon*, alors le *Pon* a *toujours* la priorité
 
 
 
-~Il est maintenant tant de choisir une tuile à défausser !~
+~Il est maintenant temps de choisir une tuile à défausser !~
