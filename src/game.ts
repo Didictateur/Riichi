@@ -569,7 +569,12 @@ export class Game {
 		this.staticCtx.fillStyle = "#f070f0";
 
 		this.staticCtx.font = "40px garamond";
-		this.staticCtx.fillText(this.deck.length().toString(), 507, 537);
+		let l = this.deck.length();
+		if (l < 10) {
+			this.staticCtx.fillText(l.toString(), 517, 537);
+		} else {
+			this.staticCtx.fillText(l.toString(), 507, 537);
+		}
 	}
 
 	private drawResult(): void {
