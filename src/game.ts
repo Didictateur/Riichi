@@ -98,7 +98,7 @@ export class Game {
 		return this.end;
 	}
 
-	public click(
+	public click( // player is playing
 		mp: mousePos,
 	): void {
 		const rect = this.cv.getBoundingClientRect();
@@ -156,13 +156,15 @@ export class Game {
 			} else { // nothing unusual
 				if (this.turn === 0 && this.selectedTile !== undefined) {
 					this.discard(0, this.selectedTile as NonNullable<number>);
-					this.checkPon();
-					let chiis = this.canDoAChii(1);
-					if (chiis.length > 0) {
-						let i = Math.floor(Math.random() * chiis.length);
-						this.chii(chiis[i], 1);
+					if (!this.checkPon()) {
+						let chiis = this.canDoAChii(1);
+						if (chiis.length > 0) {
+							let i = Math.floor(Math.random() * chiis.length);
+							this.chii(chiis[i], 1);
+						} else {
+							this.turn = (this.turn + 1) % 4;
+						}
 					}
-					this.turn = (this.turn + 1) % 4;
 				}
 			}
 		}
@@ -343,13 +345,14 @@ export class Game {
 		return chiis;
 	}
 
-	private checkPon(): void {
+	private checkPon(): boolean {
 		for (var p = 1; p < 4; p++) {
 			if (this.canDoAPon(p)) {
 				this.pon(this.lastDiscard as NonNullable<number>, p);
-				break;
+				return true;
 			}
 		}
+		return false;
 	}
 
 	private canDoAPon(player: number = 0): boolean {
@@ -429,7 +432,7 @@ export class Game {
 
 	private drawHands() {
 		const pi = 3.141592;
-		const showHands = false;
+		const showHands = true;
 		
 		this.hands[0].drawHand(
 			this.staticCtx,
