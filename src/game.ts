@@ -433,7 +433,7 @@ export class Game {
 
 	private drawHands() {
 		const pi = 3.141592;
-		const showHands = true;
+		const showHands = false;
 		
 		this.hands[0].drawHand(
 			this.staticCtx,
