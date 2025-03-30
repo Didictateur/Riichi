@@ -139,7 +139,7 @@ export class Game {
 					} else {
 						this.turn++;
 					}
-					this.hasPicked = true;
+					this.hasPicked = false;
 					this.hasPlayed = false;
 				} else if (action === 1) { // chii
 					let chiis = this.canDoAChii();
@@ -357,9 +357,10 @@ export class Game {
 
 	private canDoAPon(player: number = 0): boolean {
 		if (
-			this.lastDiscard !== undefined &&
-			this.lastDiscard !== player &&
-			this.turn !== player
+			this.lastDiscard !== undefined && // il y a une défausse
+			this.lastDiscard !== player && // pas sa propre défausse
+			this.turn !== player && // pas son propre tour
+			!(this.hasPicked && !this.hasPlayed) // pas un joueur en train de jouer
 		) {
 			let t = this.discards[this.lastDiscard][this.discards[this.lastDiscard].length-1];
 			return this.hands[player].count(t.getFamily(), t.getValue()) >= 2;
