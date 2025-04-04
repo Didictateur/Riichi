@@ -26,7 +26,7 @@ eval("__webpack_require__.r(__webpack_exports__);\n/* harmony export */ __webpac
   \**************************/
 /***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
 
-eval("__webpack_require__.r(__webpack_exports__);\n/* harmony import */ var _parse__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./parse */ \"./src/text/parse.ts\");\n\nvar CANVAS_ID = \"myTextCanvas\";\nvar BG_RECT = { x: 0, y: 0, w: 800, h: 1050, color: \"#007733\" };\nvar canvas = document.getElementById(CANVAS_ID);\nvar ctx = canvas.getContext(\"2d\");\ncanvas.width = BG_RECT.w;\ncanvas.height = BG_RECT.h;\nvar path = \"../src/text/\";\nctx.fillStyle = BG_RECT.color;\nctx.fillRect(BG_RECT.x, BG_RECT.y, BG_RECT.w, BG_RECT.h);\n(0,_parse__WEBPACK_IMPORTED_MODULE_0__.drawText)(path + \"txt0.txt\", ctx).catch(function (error) { return console.error(error); });\n\n\n//# sourceURL=webpack:///./src/text/txt0.ts?");
+eval("__webpack_require__.r(__webpack_exports__);\n/* harmony import */ var _parse__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./parse */ \"./src/text/parse.ts\");\n\nvar CANVAS_ID = \"myTextCanvas\";\nvar BG_RECT = { x: 0, y: 0, w: 800, h: 1050, color: \"#007733\" };\nvar canvas = document.getElementById(CANVAS_ID);\nvar ctx = canvas.getContext(\"2d\");\ncanvas.width = BG_RECT.w;\ncanvas.height = BG_RECT.h;\nvar path = \"src/text/\";\nctx.fillStyle = BG_RECT.color;\nctx.fillRect(BG_RECT.x, BG_RECT.y, BG_RECT.w, BG_RECT.h);\n(0,_parse__WEBPACK_IMPORTED_MODULE_0__.drawText)(path + \"txt0.txt\", ctx).catch(function (error) { return console.error(error); });\n\n\n//# sourceURL=webpack:///./src/text/txt0.ts?");
 
 /***/ })
 
