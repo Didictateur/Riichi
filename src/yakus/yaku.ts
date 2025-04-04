@@ -195,8 +195,8 @@ ittsuu: function(
 	wind: number
 ): number {
 	let gr = groups.concat(hand.toGroup() as NonNullable<Array<Group>>);
+	gr = gr.filter(g => chii(g));
 	gr.sort((g1, g2) => g1.compare(g2));
-	gr.filter(g => chii(g));
 	if (gr.length < 3) { // trop peu de suite
 		return 0;
 	} else if (gr.length === 3) { // pile le bon nombre
@@ -213,7 +213,27 @@ ittsuu: function(
 			return groups.length > 0 ? 1 : 2;
 		}
 	} else { // il y a un intrus
-		return 0 //TODO
+		for (let i = 0; i < 4; i++) {
+			let index = []
+			for (let j = 0; j < 4; j++) {
+				if (j !== i) {
+					index.push(j);
+				}
+			}
+			let t0 = gr[index[0]].getTiles();
+			let t1 = gr[index[1]].getTiles();
+			let t2 = gr[index[2]].getTiles();
+			if (
+				t0[0].getValue() === 1 &&
+				t1[0].getValue() === 4 &&
+				t2[0].getValue() === 7 &&
+				t0[0].getFamily() === t1[0].getFamily() &&
+				t0[0].getFamily() === t2[0].getFamily()
+			) {
+				return groups.length > 0 ? 1 : 2;
+			}
+		}
+		return 0;
 	}
 	return 0;
 },
@@ -245,15 +265,33 @@ yakuhai: function(
 	 * brelan de valeur
 	 * 1/1
 	 */
-	// TODO multiplicité !
 	hand: Hand,
 	groups: Array<Group>,
 	wind: number
 ): number {
-	return 0;
+	let gr = groups.concat(hand.toGroup() as NonNullable<Array<Group>>);
+	gr = gr.filter(g => pon(g) && g.getTiles().length === 3);
+	let han = 0;
+	gr.forEach(
+		g => {
+			let t = g.getTiles();
+			let f = t[0].getFamily();
+			let v = t[0].getValue();
+			if (f === 5) { // brelan de dragon
+				han++;
+			}
+			if (f === 4 && v === 0) { // vent d'est
+				han++;
+			}
+			if (f === 4 && v === wind) { // vent du joueur
+				han++;
+			}
+		}
+	);
+	return han;
 },
 
-shousangen: function( //TODO
+shousangen: function(
 	/**
 	 * trois petits dragons
 	 * 2/2
@@ -262,10 +300,29 @@ shousangen: function( //TODO
 	groups: Array<Group>,
 	wind: number
 ): number {
+	let gr = groups.concat(hand.toGroup() as NonNullable<Array<Group>>);
+	gr = gr.filter(g => pon(g));
+	let nbPon = 0;
+	let nbPair = 0;
+	gr.forEach(
+		g => {
+			let t = g.getTiles();
+			if (t[0].getFamily() === 5) {
+				if (t.length === 3) {
+					nbPon++;
+				} else {
+					nbPair++;
+				}
+			}
+		}
+	)
+	if (nbPon == 2 && nbPair == 1) {
+		return 2;
+	}
 	return 0;
 },
 
-daisangen: function( //TODO
+daisangen: function(
 	/**
 	 * trois grands dragons
 	 * 13/13
@@ -274,10 +331,19 @@ daisangen: function( //TODO
 	groups: Array<Group>,
 	wind: number
 ): number {
+	let gr = groups.concat(hand.toGroup() as NonNullable<Array<Group>>);
+	gr = gr.filter(
+		g => pon(g) &&
+			g.getTiles().length === 3 &&
+			g.getTiles()[0].getFamily() === 5
+	);
+	if (gr.length === 3) {
+		return 13;
+	}
 	return 0;
 },
 
-shousuushii: function( //TODO
+shousuushii: function(
 	/**
 	 * quatre petits vents
 	 * 13/13
@@ -286,10 +352,29 @@ shousuushii: function( //TODO
 	groups: Array<Group>,
 	wind: number
 ): number {
+	let gr = groups.concat(hand.toGroup() as NonNullable<Array<Group>>);
+	gr = gr.filter(g => pon(g));
+	let nbPon = 0;
+	let nbPair = 0;
+	gr.forEach(
+		g => {
+			let t = g.getTiles();
+			if (t[0].getFamily() === 4) {
+				if (t.length === 3) {
+					nbPon++;
+				} else {
+					nbPair++;
+				}
+			}
+		}
+	)
+	if (nbPon == 3 && nbPair == 1) {
+		return 13;
+	}
 	return 0;
 },
 
-daisuushi: function( //TODO
+daisuushi: function(
 	/**
 	 * quatre grands vents
 	 * 13/13
@@ -298,6 +383,25 @@ daisuushi: function( //TODO
 	groups: Array<Group>,
 	wind: number
 ): number {
+	let gr = groups.concat(hand.toGroup() as NonNullable<Array<Group>>);
+	gr = gr.filter(g => pon(g));
+	let nbPon = 0;
+	let nbPair = 0;
+	gr.forEach(
+		g => {
+			let t = g.getTiles();
+			if (t[0].getFamily() === 4) {
+				if (t.length === 3) {
+					nbPon++;
+				} else {
+					nbPair++;
+				}
+			}
+		}
+	)
+	if (nbPon == 4 && nbPair == 0) {
+		return 13;
+	}
 	return 0;
 },
 
