@@ -135,7 +135,34 @@ sanshokuDoujun: function( // TODO
 	groups: Array<Group>,
 	wind: number
 ): number {
-	return 0;
+	let h = hand.toGroup();
+	let gr;
+	if (h !== undefined) {
+		gr = groups.concat(h);
+	} else {
+		gr = groups;
+	}
+	gr = gr.filter(g => chii(g));
+	gr.sort((g1, g2) => g1.compare(g2))
+	if (gr.length < 3) { // pas assez de chii
+		return 0;
+	} else if(gr.length === 3) {
+		let t0 = gr[0].getTiles();
+		let t1 = gr[1].getTiles();
+		let t2 = gr[2].getTiles();
+		if (
+			t0[0].getValue() === t1[0].getValue() &&
+			t0[0].getValue() === t2[0].getValue() &&
+			t0[0].getFamily() !== t1[0].getFamily() &&
+			t0[0].getFamily() !== t2[0].getFamily() &&
+			t1[0].getFamily() !== t2[0].getFamily()
+		) {
+			return groups.length > 0 ? 1 : 2;
+		}
+		return 0;
+	} else {// il y a un intrus
+		return 1
+	}
 },
 
 ittsuu: function(
