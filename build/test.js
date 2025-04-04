@@ -40,6 +40,26 @@ eval("__webpack_require__.r(__webpack_exports__);\n/* harmony export */ __webpac
 
 /***/ }),
 
+/***/ "./src/tests/test.ts":
+/*!***************************!*\
+  !*** ./src/tests/test.ts ***!
+  \***************************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+eval("__webpack_require__.r(__webpack_exports__);\n/* harmony import */ var _test_hand__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./test_hand */ \"./src/tests/test_hand.ts\");\n/* harmony import */ var _test_yakus__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./test_yakus */ \"./src/tests/test_yakus.ts\");\n\n\n\n\n//# sourceURL=webpack:///./src/tests/test.ts?");
+
+/***/ }),
+
+/***/ "./src/tests/test_hand.ts":
+/*!********************************!*\
+  !*** ./src/tests/test_hand.ts ***!
+  \********************************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+eval("__webpack_require__.r(__webpack_exports__);\n/* harmony import */ var _hand__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../hand */ \"./src/hand.ts\");\n/* harmony import */ var _assert__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./assert */ \"./src/tests/assert.ts\");\nvar _a, _b, _c, _d, _e;\n\n\nvar h0 = new _hand__WEBPACK_IMPORTED_MODULE_0__.Hand(\"s1s1\");\nvar h1 = new _hand__WEBPACK_IMPORTED_MODULE_0__.Hand(\"m1m2m3\");\nvar h2 = new _hand__WEBPACK_IMPORTED_MODULE_0__.Hand(\"m2m2m2 p1p1\");\nvar h3 = new _hand__WEBPACK_IMPORTED_MODULE_0__.Hand(\"m1m2m3 p1p2p3 s1s2s3 m9m9m9 p9p9\");\nvar h4 = new _hand__WEBPACK_IMPORTED_MODULE_0__.Hand(\"m2m2m2 p1p1p1\");\nvar count = 0;\nvar total = 0;\ncount += (0,_assert__WEBPACK_IMPORTED_MODULE_1__.assert)(((_a = h0.toGroup()) === null || _a === void 0 ? void 0 : _a.length) === 1, \"s11 has 1 group\");\ncount += (0,_assert__WEBPACK_IMPORTED_MODULE_1__.assert)(((_b = h1.toGroup()) === null || _b === void 0 ? void 0 : _b.length) === 1, \"m123 has 1 group\");\ncount += (0,_assert__WEBPACK_IMPORTED_MODULE_1__.assert)(((_c = h2.toGroup()) === null || _c === void 0 ? void 0 : _c.length) === 2, \"m222 p11 has 2 groups\");\ncount == (0,_assert__WEBPACK_IMPORTED_MODULE_1__.assert)(((_d = h3.toGroup()) === null || _d === void 0 ? void 0 : _d.length) === 5, \"m123 p123 s123 m999 p99 has 5 groups\");\ncount += (0,_assert__WEBPACK_IMPORTED_MODULE_1__.assert)(((_e = h4.toGroup()) === null || _e === void 0 ? void 0 : _e.length) === 2, \"m222 p111 has 2 groups\");\ntotal += 4;\nconsole.log(\"Succès: \" + count.toString() + \"/\" + total.toString());\n\n\n//# sourceURL=webpack:///./src/tests/test_hand.ts?");
+
+/***/ }),
+
 /***/ "./src/tests/test_yakus.ts":
 /*!*********************************!*\
   !*** ./src/tests/test_yakus.ts ***!
@@ -130,7 +150,7 @@ eval("__webpack_require__.r(__webpack_exports__);\n/* harmony export */ __webpac
 /******/ 	// startup
 /******/ 	// Load entry module and return exports
 /******/ 	// This entry module can't be inlined because the eval devtool is used.
-/******/ 	var __webpack_exports__ = __webpack_require__("./src/tests/test_yakus.ts");
+/******/ 	var __webpack_exports__ = __webpack_require__("./src/tests/test.ts");
 /******/ 	
 /******/ })()
 ;

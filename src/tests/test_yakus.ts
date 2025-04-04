@@ -7,11 +7,11 @@ let total = 0;
 
 let h1 = new Hand("m1m2m3 m4m5m6 m7m8m9 p1p2p3 p5p5");
 let h2 = new Hand("m1m1m1 m4m4m4 m7m7m7 p1p1p1 p5p5");
-let h3 = new Hand("m1m1m1p9p9p9s1s1s1w2w2w2d1d1");
+let h3 = new Hand("m1m1m1 p9p9p9 s1s1s1 w2w2w2 d1d1");
 let h4 = new Hand("m2m3m4 p3p3p3 p4p5p6 s4s4 s6s7s8");
-let h5 = new Hand("m1m2m3m1m2m3p7p8p9p7p8p9w3w3");
+let h5 = new Hand("m1m2m3 m1m2m3 p7p8p9 p7p8p9 w3w3");
 let h6 = new Hand("m1m2m3 m1m2m3 p6p7p8 p7p8p9 w3w3");
-let h7 = new Hand("m1m2m3 p1p2p3 s1s2s3 m9m9m9 p9p9");
+let h7 = new Hand("m1m2m3 p1p2p3 s1s2s3 m7m8m9 p9p9");
 
 // lipeikou
 count += assert(yakus.lipekou(h5, [], 0) === 1, "m123 m123 p789 p789 w33 is Lipeikou");
@@ -29,7 +29,7 @@ count += assert(yakus.pinfu(h2, [], 0) === 0, "m111 m444 m777 p111 p55 is not Pi
 total += 2;
 
 // sanshoku doujun
-count += assert(yakus.sanshokuDoujun(h7, [], 0) === 2, "m123 p123 s123 m999 p99 is Shanshokou Doujun");
+count += assert(yakus.sanshokuDoujun(h7, [], 0) === 2, "m123 p123 s123 m789 p99 is Shanshokou Doujun");
 count += assert(yakus.sanshokuDoujun(h2, [], 0) === 0, "m111 m444 m777 p111 p55 is not Shanshokou Doujun");
 total += 2;
 

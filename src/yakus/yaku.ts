@@ -126,7 +126,7 @@ pinfu: function(
 	return 0;
 },
 
-sanshokuDoujun: function( // TODO
+sanshokuDoujun: function(
 	/**
 	 * triple suite
 	 * 1/2
@@ -136,7 +136,7 @@ sanshokuDoujun: function( // TODO
 	wind: number
 ): number {
 	let h = hand.toGroup();
-	let gr;
+	let gr = [];
 	if (h !== undefined) {
 		gr = groups.concat(h);
 	} else {
@@ -161,7 +161,27 @@ sanshokuDoujun: function( // TODO
 		}
 		return 0;
 	} else {// il y a un intrus
-		return 1
+		for (let i = 0; i < 4; i++) {
+			let index = []
+			for (let j = 0; j < 4; j++) {
+				if (j !== i) {
+					index.push(j);
+				}
+			}
+			let t0 = gr[index[0]].getTiles();
+			let t1 = gr[index[1]].getTiles();
+			let t2 = gr[index[2]].getTiles();
+			if (
+				t0[0].getValue() === t1[0].getValue() &&
+				t0[0].getValue() === t2[0].getValue() &&
+				t0[0].getFamily() !== t1[0].getFamily() &&
+				t0[0].getFamily() !== t2[0].getFamily() &&
+				t1[0].getFamily() !== t2[0].getFamily()
+			) {
+				return groups.length > 0 ? 1 : 2;
+			}
+		}
+		return 0;
 	}
 },
 

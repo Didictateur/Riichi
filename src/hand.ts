@@ -7,8 +7,8 @@ export class Hand {
 	
 	public constructor(stiles: string = "") {
 		this.tiles = [];
-		for (let i = 0; 2 * i + 1 < stiles.length; i++) {
-			let ss = stiles.substring(2*i, 2*(i+1));
+		for (let i = 0; i < stiles.length - 1; i++) {
+			let ss = stiles.substring(i, i+2);
 			if (ss[0] === "m") {
 				this.tiles.push(new Tile(1, Number(ss[1]), false));
 			} else if (ss[0] === "p") {
@@ -139,11 +139,11 @@ export class Hand {
 
 			this.tiles.push(t1);
 			this.tiles.sort();
+			return undefined;
 
 		} else {
 			return [];
 		}
-		return undefined
 	}
 	
 	public drawHand (
