@@ -6,7 +6,7 @@ import { Game } from "../game"
 const CANVAS_ID = "myCanvas";
 const BG_RECT = { x: 0, y: 0, w: 1050, h: 1050 };
 var MOUSE = { x: 0, y: 0 };
-const FPS = 30;
+const FPS = 60;
 const FRAME_INTERVAL = 1000 / FPS;
 
 // variables globales

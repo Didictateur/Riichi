@@ -70,6 +70,8 @@ export class Tile {
 		ctx.translate(x + (75 * size) / 2, y + (100 * size) / 2);
 		if (tilted) {
 			ctx.rotate(rotation + this.tilt);
+		} else {
+			ctx.rotate(rotation);
 		}
 
 		if (hidden) {

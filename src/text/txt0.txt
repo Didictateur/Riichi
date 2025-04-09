@@ -1,4 +1,4 @@
-Bienvenu sur ce site dédié au *Mahjong* !
+Bienvenue sur ce site dédié au *Mahjong* !
 
 Ce site est principalement destiné aux personnes découvrant ce
 formidable jeu.
@@ -21,7 +21,6 @@ Cependant, de nombreux services y sont proposés:
 
 - *Une introduction au MCR*, la variante chinoise dans l'onglet
   #ff00ff{MCR}
-
 
 Evidemment, ce site n'est pas encore fini, et possède encore
 beaucoup de problème. Pour le moindre retour, ne pas hésiter
