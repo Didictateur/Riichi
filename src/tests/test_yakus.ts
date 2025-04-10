@@ -17,6 +17,7 @@ let h9 = new Hand("m1m2m3 m1m2m3 d1d1d1 d2d2d2 d3d3");
 let h10 = new Hand("m1m2m3 p6p6 d1d1d1 d2d2d2 d3d3d3");
 let h11 = new Hand("m1m2m3 w1w1w1 w2w2w2 w3w3w3 w4w4");
 let h12 = new Hand("m1m1 w1w1w1 w2w2w2 w3w3w3 w4w4w4");
+let h13 = new Hand("d1d1 w1w1w1 w2w2w2 w3w3w3 w4w4w4");
 
 // lipeikou
 count += assert(yakus.lipekou(h5, [], 0) === 1, "m123 m123 p789 p789 w33 is Lipeikou");
@@ -67,16 +68,27 @@ count += assert(yakus.daisangen(h3, [], 0) === 0, "m111 p999 s111 w222 d11 is no
 total += 3;
 
 // shousuushi
-count += assert(yakus.shousuushii(h11, [], 0) === 13, "m123 w111 w222 w333 w44 is Daisangen");
-count += assert(yakus.shousuushii(h12, [], 0) === 0, "m11 w111 w222 w333 w444 is not Daisangen");
-count += assert(yakus.shousuushii(h3, [], 0) === 0, "m111 p999 s111 w222 d11 is not Daisangen");
+count += assert(yakus.shousuushii(h11, [], 0) === 13, "m123 w111 w222 w333 w44 is Shousuushi");
+count += assert(yakus.shousuushii(h12, [], 0) === 0, "m11 w111 w222 w333 w444 is not Shousuushi");
+count += assert(yakus.shousuushii(h3, [], 0) === 0, "m111 p999 s111 w222 d11 is not Shousuushi");
 total += 3;
 
 // daisuushi
-count += assert(yakus.daisuushi(h12, [], 0) === 13, "m11 w111 w222 w333 w444 is Daisangen");
-count += assert(yakus.daisuushi(h11, [], 0) === 0, "m123 w111 w222 w333 w44 is not Daisangen");
-count += assert(yakus.daisuushi(h3, [], 0) === 0, "m111 p999 s111 w222 d11 is not Daisangen");
+count += assert(yakus.daisuushi(h12, [], 0) === 13, "m11 w111 w222 w333 w444 is Daisuushi");
+count += assert(yakus.daisuushi(h11, [], 0) === 0, "m123 w111 w222 w333 w44 is not Daisuushi");
+count += assert(yakus.daisuushi(h3, [], 0) === 0, "m111 p999 s111 w222 d11 is not Daisuushi");
 total += 3;
+
+// chanta
+count += assert(yakus.chanta(h13, [], 0) === 2, "d11 w111 w222 w333 w444 is Chanta");
+count += assert(yakus.chanta(h12, [], 0) === 2, "m11 w111 w222 w333 w444 is Chanta");
+count += assert(yakus.chanta(h10, [], 0) === 0, "m123 p66 d111 d222 d333 is not Chanta");
+total += 3;
+
+// junchan
+count += assert(yakus.junchan(h7, [], 0) === 3, "m123 p123 s123 m789 p99 is Junchan");
+count += assert(yakus.junchan(h10, [], 0) === 0, "m123 p66 d111 d222 d333 is not Junchan");
+total += 2;
 
 // total
 console.log("Succès: " + count.toString() + "/" + total.toString());

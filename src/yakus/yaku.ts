@@ -405,7 +405,7 @@ daisuushi: function(
 	return 0;
 },
 
-chanta: function( //TODO
+chanta: function(
 	/**
 	 * terminales et honneurs partout
 	 * 1/2
@@ -414,10 +414,23 @@ chanta: function( //TODO
 	groups: Array<Group>,
 	wind: number
 ): number {
-	return 0;
+	let gr = groups.concat(hand.toGroup() as NonNullable<Array<Group>>);
+	gr = gr.filter(
+		g => {
+			let tiles = g.getTiles();
+			let f = tiles[0].getFamily();
+			let v = tiles[0].getValue();
+			let vd = tiles[tiles.length - 1].getValue();
+			return f < 4 && v !== 1 && vd !== 9
+		}
+	);
+	if (gr.length > 0) {
+		return 0;
+	}
+	return groups.length > 0 ? 1 : 2;
 },
 
-junchan: function( //TODO
+junchan: function(
 	/**
 	 * terminales partout
 	 * 2/3
@@ -426,7 +439,20 @@ junchan: function( //TODO
 	groups: Array<Group>,
 	wind: number
 ): number {
-	return 0;
+	let gr = groups.concat(hand.toGroup() as NonNullable<Array<Group>>);
+	gr = gr.filter(
+		g => {
+			let tiles = g.getTiles();
+			let f = tiles[0].getFamily();
+			let v = tiles[0].getValue();
+			let vd = tiles[tiles.length - 1].getValue();
+			return f > 3 || (v !== 1 && vd !== 9)
+		}
+	);
+	if (gr.length > 0) {
+		return 0;
+	}
+	return groups.length > 0 ? 2 : 3;
 },
 
 honroutou: function( //TODO
