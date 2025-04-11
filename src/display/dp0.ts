@@ -45,7 +45,6 @@ function drawFrame(deltaTime: number) {
     staticCtx.fillRect(BG_RECT.x, BG_RECT.y, BG_RECT.w, BG_RECT.h);
     
     // Dessin de la pluie
-		console.log("draw")
     RAIN.drawRain(staticCtx);
     
     // Copier le buffer au canvas principal

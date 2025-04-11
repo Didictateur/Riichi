@@ -11,10 +11,10 @@ function ord(g: Group): boolean {
 
 function term(g: Group): boolean {
 	return g.getTiles().every(
-		t =>
+		t => {
 			t.getFamily() < 4 &&
-			(t.getValue() === 0 ||
-			 t.getValue() === 9)
+			(t.getValue() === 1 ||
+			 t.getValue() === 9)}
 	);
 }
 
@@ -41,15 +41,15 @@ function pon(g: Group): boolean {
 
 export const yakus = {
 
+/**
+ * double suite pure
+ * 0/1
+ */
 lipekou: function (
-	/**
-	 * double suite pure
-	 * 0/1
-	 */
 	hand: Hand,
 	groups: Array<Group>,
 	wind: number
-): number {
+): number {	
 	if (groups.length > 0 && !yakus.ryanpeikou(hand, groups, wind)) { // ouvert
 		return 0;
 	}
@@ -68,11 +68,11 @@ lipekou: function (
 	return 0;
 },
 
+/**
+ * deux doubles suites pures
+ * 0/3
+ */
 ryanpeikou: function (
-	/**
-	 * deux doubles suites pures
-	 * 0/3
-	 */
 	hand: Hand,
 	groups: Array<Group>,
 	wind: number
@@ -99,11 +99,11 @@ ryanpeikou: function (
 	return 0;
 },
 
-pinfu: function(
-	/**
-	 * tout suite
-	 * 0/1
-	 */
+/**
+ * tout suite
+ * 0/1
+ */
+pinfu: function(	
 	hand: Hand,
 	groups: Array<Group>,
 	wind: number
@@ -126,11 +126,11 @@ pinfu: function(
 	return 0;
 },
 
+/**
+ * triple suite
+ * 1/2
+ */
 sanshokuDoujun: function(
-	/**
-	 * triple suite
-	 * 1/2
-	 */
 	hand: Hand,
 	groups: Array<Group>,
 	wind: number
@@ -185,11 +185,11 @@ sanshokuDoujun: function(
 	}
 },
 
-ittsuu: function(
-	/**
-	 * grande suite pure
-	 * 1/2
-	 */
+/**
+ * grande suite pure
+ * 1/2
+ */
+ittsuu: function(	
 	hand: Hand,
 	groups: Array<Group>,
 	wind: number
@@ -238,11 +238,11 @@ ittsuu: function(
 	return 0;
 },
 
-tanyao: function(
-	/**
-	 * tout ordinaire
-	 * 1/1
-	 */
+/**
+ * tout ordinaire
+ * 1/1
+ */
+tanyao: function(	
 	hand: Hand,
 	groups: Array<Group>,
 	wind: number
@@ -260,11 +260,11 @@ tanyao: function(
 	return 0;
 },
 
-yakuhai: function(
-	/**
-	 * brelan de valeur
-	 * 1/1
-	 */
+/**
+ * brelan de valeur
+ * 1/1
+ */
+yakuhai: function(	
 	hand: Hand,
 	groups: Array<Group>,
 	wind: number
@@ -291,11 +291,11 @@ yakuhai: function(
 	return han;
 },
 
-shousangen: function(
-	/**
-	 * trois petits dragons
-	 * 2/2
-	 */
+/**
+ * trois petits dragons
+ * 2/2
+ */
+shousangen: function(	
 	hand: Hand,
 	groups: Array<Group>,
 	wind: number
@@ -322,11 +322,11 @@ shousangen: function(
 	return 0;
 },
 
-daisangen: function(
-	/**
-	 * trois grands dragons
-	 * 13/13
-	 */
+/**
+ * trois grands dragons
+ * 13/13
+ */
+daisangen: function(	
 	hand: Hand,
 	groups: Array<Group>,
 	wind: number
@@ -343,11 +343,11 @@ daisangen: function(
 	return 0;
 },
 
-shousuushii: function(
-	/**
-	 * quatre petits vents
-	 * 13/13
-	 */
+/**
+ * quatre petits vents
+ * 13/13
+ */
+shousuushii: function(	
 	hand: Hand,
 	groups: Array<Group>,
 	wind: number
@@ -374,11 +374,11 @@ shousuushii: function(
 	return 0;
 },
 
-daisuushi: function(
-	/**
-	 * quatre grands vents
-	 * 13/13
-	 */
+/**
+ * quatre grands vents
+ * 13/13
+ */
+daisuushi: function(	
 	hand: Hand,
 	groups: Array<Group>,
 	wind: number
@@ -405,11 +405,11 @@ daisuushi: function(
 	return 0;
 },
 
-chanta: function(
-	/**
-	 * terminales et honneurs partout
-	 * 1/2
-	 */
+/**
+ * terminales et honneurs partout
+ * 1/2
+ */
+chanta: function(	
 	hand: Hand,
 	groups: Array<Group>,
 	wind: number
@@ -430,11 +430,11 @@ chanta: function(
 	return groups.length > 0 ? 1 : 2;
 },
 
+/**
+ * terminales partout
+ * 2/3
+ */
 junchan: function(
-	/**
-	 * terminales partout
-	 * 2/3
-	 */
 	hand: Hand,
 	groups: Array<Group>,
 	wind: number
@@ -455,23 +455,35 @@ junchan: function(
 	return groups.length > 0 ? 2 : 3;
 },
 
-honroutou: function( //TODO
-	/**
-	 * tout terminale et honneur
-	 * 2/2
-	 */
+/**
+ * tout terminale et honneur
+ * 2/2
+ */
+honroutou: function(	
 	hand: Hand,
 	groups: Array<Group>,
 	wind: number
 ): number {
-	return 0;
+	let gr = groups.concat(hand.toGroup() as NonNullable<Array<Group>>);
+	gr = gr.filter(
+		g => {
+			let tiles = g.getTiles();
+			let f = tiles[0].getFamily();
+			let v = tiles[1].getValue();
+			return f < 4 && v !== 1 && v !== 9
+		}
+	);
+	if (gr.length > 0) {
+		return 0;
+	}
+	return 2;
 },
 
-chinroutou: function(
-	/**
-	 * tout terminale
-	 * 13/13
-	 */
+/**
+ * tout terminale
+ * 13/13
+ */
+chinroutou: function(	
 	hand: Hand,
 	groups: Array<Group>,
 	wind: number
@@ -489,11 +501,11 @@ chinroutou: function(
 	return 0;
 },
 
-tsuuiisou: function(
-	/**
-	 * tout honneur
-	 * 13/13
-	 */
+/**
+ * tout honneur
+ * 13/13
+ */
+tsuuiisou: function(	
 	hand: Hand,
 	groups: Array<Group>,
 	wind: number
@@ -511,11 +523,11 @@ tsuuiisou: function(
 	return 0;
 },
 
+/**
+ * treize orphelins
+ * 0/13
+ */
 kokushiMusou: function(
-	/**
-	 * treize orphelins
-	 * 0/13
-	 */
 	hand: Hand,
 	groups: Array<Group>,
 	wind: number
@@ -523,10 +535,16 @@ kokushiMusou: function(
 	if (groups.length > 0) {
 		return 0;
 	}
-	if (yakus.honroutou(hand, groups, wind) === 0) {
+	let h = hand.getTiles();
+	if (
+		h.some(t =>
+			t.getFamily() < 4 &&
+			t.getValue() > 1 &&
+			t.getValue() < 9
+		)
+	) {
 		return 0;
 	}
-	let h = hand.getTiles();
 	let count = 0;
 	for (let i = 0; i < h.length - 1; i++) {
 		if (h[i].isEqual(h[i+1].getFamily(), h[i+1].getValue())) {
@@ -542,27 +560,38 @@ kokushiMusou: function(
 	return 0;
 },
 
+/**
+ * sept paires
+ * 0/2
+ */
 chiitoitsu: function(
-	/**
-	 * sept paires
-	 * 0/2
-	 */
 	hand: Hand,
 	groups: Array<Group>,
 	wind: number
 ): number {
-	return 0;
 	if (groups.length > 0) {
 		return 0;
 	}
-	//TODO
+	let h = hand.getTiles();
+	if (h.length !== 14) {
+		return 0;
+	}
+	for (let i = 0; i < 14; i += 2) {
+		if (
+			h[i].compare(h[i+1]) !== 0 ||
+			(i > 0 && h[i].compare(h[i-1]) === 0)
+		) {
+			return 0
+		}
+	}
+	return 2;
 },
 
+/**
+ * tout brelans
+ * 2/2
+ */
 toitoi: function(
-	/**
-	 * tout brelans
-	 * 2/2
-	 */
 	hand: Hand,
 	groups: Array<Group>,
 	wind: number
@@ -577,11 +606,11 @@ toitoi: function(
 	return 0;
 },
 
-sanankou: function(
-	/**
-	 * trois brelan cachés
-	 * 2/2
-	 */
+/**
+ * trois brelan cachés
+ * 2/2
+ */
+sanankou: function(	
 	hand: Hand,
 	groups: Array<Group>,
 	wind: number
@@ -601,11 +630,11 @@ sanankou: function(
 	return 0;
 },
 
+/**
+ * quatre brelans cachés
+ * 0/13
+ */
 suuankou: function(
-	/**
-	 * quatre brelans cachés
-	 * 0/13
-	 */
 	hand: Hand,
 	groups: Array<Group>,
 	wind: number

@@ -1,6 +1,7 @@
 import { assert } from "./assert"
 import { yakus } from "../yakus/yaku"
 import { Hand } from "../hand"
+import { Group } from "../group";
 
 let count = 0;
 let total = 0;
@@ -18,6 +19,12 @@ let h10 = new Hand("m1m2m3 p6p6 d1d1d1 d2d2d2 d3d3d3");
 let h11 = new Hand("m1m2m3 w1w1w1 w2w2w2 w3w3w3 w4w4");
 let h12 = new Hand("m1m1 w1w1w1 w2w2w2 w3w3w3 w4w4w4");
 let h13 = new Hand("d1d1 w1w1w1 w2w2w2 w3w3w3 w4w4w4");
+let h14 = new Hand("m1m1 m9m9m9 p1p1p1 p9p9p9 s1s1s1");
+let h15 = new Hand("m1m9m9 p1p9 s1s9 w1w2w3w4 d1d2d3");
+let h16 = new Hand("m1m1 m2m2 m3m3 m4m4 m5m5 m6m6 m7m7");
+let h17 = new Hand("m1m1 m2m2 m3m3 m4m4 m5m5 m6m6 m6m6");
+let h18 = new Hand("m1m2m3 m4m4m4 m7m7m7 p1p1p1 p5p5");
+let h19 = new Hand("m1m2m3 m7m7m7 p1p1p1 p5p5");
 
 // lipeikou
 count += assert(yakus.lipekou(h5, [], 0) === 1, "m123 m123 p789 p789 w33 is Lipeikou");
@@ -89,6 +96,51 @@ total += 3;
 count += assert(yakus.junchan(h7, [], 0) === 3, "m123 p123 s123 m789 p99 is Junchan");
 count += assert(yakus.junchan(h10, [], 0) === 0, "m123 p66 d111 d222 d333 is not Junchan");
 total += 2;
+
+// honroutou
+count += assert(yakus.honroutou(h14, [], 0) === 2, "m11 m999 p111 p999 s111 is Honroutou");
+count += assert(yakus.honroutou(h3, [], 0) === 2, "m111 p999 s111 w222 d11 is Honroutou");
+count += assert(yakus.honroutou(h10, [], 0) === 0, "m123 p66 d111 d222 d333 is not Honroutou");
+total += 3;
+
+// chinroutou
+count += assert(yakus.chinroutou(h14, [], 0) === 13, "m11 m999 p111 p999 s111 is Chinroutou");
+count += assert(yakus.chinroutou(h3, [], 0) === 0, "m111 p999 s111 w222 d11 is not Chinroutou");
+count += assert(yakus.chinroutou(h10, [], 0) === 0, "m123 p66 d111 d222 d333 is not Chinroutou");
+total += 3;
+
+// tsuuisou
+count += assert(yakus.tsuuiisou(h13, [], 0) === 13, "d11 w111 w222 w333 w444 is Tsuuisou");
+count += assert(yakus.tsuuiisou(h3, [], 0) === 0, "m111 p999 s111 w222 d11 is not Tsuuisou");
+total += 2;
+
+// kokushiMusou
+count += assert(yakus.kokushiMusou(h15, [], 0) === 13, "m1m9m9 p1p9 s1s9 w1w2w3w4 d1d2d3 is Kokushi Musou");
+count += assert(yakus.kokushiMusou(h3, [], 0) === 0, "m111 p999 s111 w222 d11 is not Kokushi Musou");
+total += 2;
+
+// chiitoitsu
+count += assert(yakus.chiitoitsu(h16, [], 0) === 2, "m11 m22 m33 m44 m55 m66 m77 is Chiitoitsu");
+count += assert(yakus.chiitoitsu(h17, [], 0) === 0, "m11 m22 m33 m44 m55 m66 m66 is not Chiitoitsu");
+count += assert(yakus.chiitoitsu(h3, [], 0) === 0, "m111 p999 s111 w222 d11 is not Chiitoitsu");
+total += 3;
+
+// toitoi
+count += assert(yakus.toitoi(h2, [], 0) === 2, "m111 m444 m777 p111 p55 is Toitoi");
+count += assert(yakus.toitoi(h7, [], 0) === 0, "m123 p123 s123 m789 p99 is not Toitoi");
+total += 2;
+
+// sanankou
+count += assert(yakus.sanankou(h18, [], 0) === 2, "m123 m444 m777 p111 p55 is Sanankou");
+count += assert(yakus.sanankou(h2, [], 0) === 0, "m111 m444 m777 p111 p55 is not Sanankou");
+count += assert(yakus.sanankou(h7, [], 0) === 0, "m123 p123 s123 m789 p99 is not Sanankou");
+total += 3;
+
+// sanankou
+count += assert(yakus.suuankou(h2, [], 0) === 13, "m111 m444 m777 p111 p55 is Sanankou");
+count += assert(yakus.suuankou(h18, [], 0) === 0, "m123 m444 m777 p111 p55 is not  Sanankou");
+count += assert(yakus.suuankou(h7, [], 0) === 0, "m123 p123 s123 m789 p99 is not Sanankou");
+total += 3;
 
 // total
 console.log("Succès: " + count.toString() + "/" + total.toString());
