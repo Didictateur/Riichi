@@ -1,6 +1,9 @@
 TESTS = $(wildcard build/test*)
 
 all:
+	npx webpack --mode production
+
+dev:
 	npx webpack --mode development
 
 zip:
