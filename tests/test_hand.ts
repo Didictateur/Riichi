@@ -1,4 +1,4 @@
-import { Hand } from "../hand"
+import { Hand } from "../src/hand"
 import { assert } from "./assert";
 
 let h0 = new Hand("s1s1");

@@ -5,7 +5,7 @@ const fs = require('fs');
 function getEntryPoints() {
   const displayDir = path.resolve(__dirname, 'src', 'display');
 	const textDir = path.resolve(__dirname, 'src', 'text');
-	const testDir = path.resolve(__dirname, 'src', 'tests');
+	const testDir = path.resolve(__dirname, '.', 'tests');
   const files = fs.readdirSync(displayDir); // Lire les fichiers du répertoire
 	const texts = fs.readdirSync(textDir);
 	const tests = fs.readdirSync(testDir);

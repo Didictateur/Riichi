@@ -1,7 +1,6 @@
 import { assert } from "./assert"
-import { yakus } from "../yakus/yaku"
-import { Hand } from "../hand"
-import { Group } from "../group";
+import { yakus } from "../src/yakus/yaku"
+import { Hand } from "../src/hand"
 
 let count = 0;
 let total = 0;
