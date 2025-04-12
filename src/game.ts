@@ -5,614 +5,703 @@ import { Group } from "./group";
 import { drawButtons, clickAction, drawChiis, clickChii } from "./button";
 import { drawState } from "./state";
 
-export type mousePos = { x: number, y: number};
+export type MousePos = { x: number, y: number };
+
+// Game constants to avoid magic numbers and improve readability
+const GAME_CONSTANTS = {
+  PLAYERS: 4,
+  BACKGROUND: { color: "#007730", x: 0, y: 0, w: 1050, h: 1050 },
+  DEAD_WALL_SIZE: 14,
+  WAITING_TIME: {
+    MIN: 500,
+    MAX: 2000,
+    DEFAULT: 700
+  },
+  DISPLAY: {
+    HAND_SIZE: 0.7,
+    HIDDEN_HAND_SIZE: 0.6,
+    DISCARD_SIZE: 0.6,
+    GROUP_SIZE: 0.6
+  },
+  PI: Math.PI
+};
 
 export class Game {
-	private deck: Deck;
-	private deadWall: Array<Tile> = [];
-	private hands: Array<Hand> = [];
-	private discards: Array<Array<Tile>>;
-	private lastDiscard: number|undefined;
-	private groups: Array<Array<Group>>;
+  private deck: Deck;
+  private deadWall: Array<Tile> = [];
+  private hands: Array<Hand> = [];
+  private discards: Array<Array<Tile>> = [];
+  private lastDiscard: number | undefined;
+  private groups: Array<Array<Group>> = [];
+  
+  // Game state
+  private level: number;
+  private turn = 0;
+  private waitingTime = GAME_CONSTANTS.WAITING_TIME.DEFAULT;
+  private selectedTile: number | undefined = undefined;
+  private canCall: boolean = false;
+  private hasPicked: boolean = false;
+  private hasPlayed: boolean = false;
+  private lastPlayed: number = Date.now();
+  private chooseChii: boolean = false;
+  private end: boolean = false;
+  private result: number = -1;
+  
+  // Canvas elements
+  private ctx: CanvasRenderingContext2D;
+  private cv: HTMLCanvasElement;
+  private staticCtx: CanvasRenderingContext2D;
+  private staticCv: HTMLCanvasElement;
+  
+  // Cached values to avoid recalculations
+  private readonly BG_RECT = GAME_CONSTANTS.BACKGROUND;
+  private readonly rotations = [0, -GAME_CONSTANTS.PI / 2, -GAME_CONSTANTS.PI, GAME_CONSTANTS.PI / 2];
 
-	// game values
-	private level: number;
-	private turn = 0;
-	private minWaitingTime = 500;
-	private maxWaitingTime = 2000;
-	private waitingTime = 700;
-	private selectedTile: number|undefined = undefined;
-	private canCall: boolean = false;
-	private hasPicked: boolean = false;
-	private hasPlayed: boolean = false;
-	private lastPlayed: number = Date.now();
-	private chooseChii: boolean = false;
-	private end: boolean = false;
-	private result: number = -1;
+  constructor(
+    ctx: CanvasRenderingContext2D,
+    cv: HTMLCanvasElement,
+    staticCtx: CanvasRenderingContext2D,
+    staticCv: HTMLCanvasElement,
+    red: boolean = false,
+    level: number = 0
+  ) {
+    this.ctx = ctx;
+    this.cv = cv;
+    this.staticCtx = staticCtx;
+    this.staticCv = staticCv;
+    this.level = level;
+    
+    // Initialize game elements
+    this.deck = new Deck(red);
+    this.initializeGame();
+  }
 
-	// display parameter
-	private BG_RECT = {color: "#007730", x: 0, y: 0, w: 1050, h: 1050};
-	private sizeHand = 0.7;
-	private sizeHiddenHand = 0.6;
-	private sizeDiscard = 0.6;
+  private initializeGame(): void {
+    this.deck.shuffle();
+    
+    // Set up dead wall
+    for (let i = 0; i < GAME_CONSTANTS.DEAD_WALL_SIZE; i++) {
+      this.deadWall.push(this.deck.pop());
+    }
+    
+    // Create player hands
+    for (let i = 0; i < GAME_CONSTANTS.PLAYERS; i++) {
+      this.hands.push(this.deck.getRandomHand());
+      this.discards.push([]);
+      this.groups.push([]);
+    }
+    
+    this.lastDiscard = undefined;
+    this.hands[0].sort();
+    this.pick(0);
+  }
 
-	// canvas
-	private ctx: CanvasRenderingContext2D;
-	private cv: HTMLCanvasElement;
-	private staticCtx: CanvasRenderingContext2D;
-	private staticCv: HTMLCanvasElement;
+  public draw(mp: MousePos): void {
+    // Clear static canvas once per frame
+    this.staticCtx.clearRect(0, 0, this.cv.width, this.cv.height);
+    
+    // Draw background
+    this.staticCtx.fillStyle = this.BG_RECT.color;
+    this.staticCtx.fillRect(
+      this.BG_RECT.x,
+      this.BG_RECT.y,
+      this.BG_RECT.w,
+      this.BG_RECT.h
+    );
+    
+    this.getSelected(mp);
+    this.drawGame();
+    
+    // Use a single drawImage operation instead of clearing and redrawing
+    this.ctx.clearRect(0, 0, this.cv.width, this.cv.height);
+    this.ctx.drawImage(this.staticCv, 0, 0);
+  }
 
-	public constructor(
-		ctx: CanvasRenderingContext2D,
-		cv: HTMLCanvasElement,
-		staticCtx: CanvasRenderingContext2D,
-		staticCv: HTMLCanvasElement,
-		red: boolean = false,
-		level: number = 0
-	) {
-		this.ctx = ctx;
-		this.cv = cv;
-		this.staticCtx = staticCtx;
-		this.staticCv = staticCv;
-		this.level = level;
-		this.deck = new Deck(red);
-		this.deck.shuffle();
-		for (let i = 0; i < 14; i++) {
-			this.deadWall.push(this.deck.pop());
-		}
-		for (let i = 0; i < 4; i++) {
-			this.hands.push(this.deck.getRandomHand());
-		}
-		this.discards = [[], [], [], []];
-		this.lastDiscard = undefined;
-		this.groups = [[], [], [], []];
+  public getDeck(): Deck {
+    return this.deck;
+  }
 
-		this.hands[0].sort();
-		this.pick(0);
-	}
+  public getHands(): Array<Hand> {
+    return this.hands;
+  }
 
-	public draw(mp: mousePos) {
-		// background
-		this.staticCtx.clearRect(0, 0, this.cv.width, this.cv.height);
-		this.staticCtx.fillStyle = this.BG_RECT.color;
-		this.staticCtx.fillRect(
-			this.BG_RECT.x,
-			this.BG_RECT.y,
-			this.BG_RECT.w,
-			this.BG_RECT.h
-		);
+  public isFinished(): boolean {
+    return this.end;
+  }
 
-		this.getSelected(mp);
+  public click(mp: MousePos): void {
+    const rect = this.cv.getBoundingClientRect();
+    
+    if (this.hasWin(0)) {
+      this.end = true;
+      this.result = 1;
+      return;
+    } 
+    
+    if (this.chooseChii) {
+      this.handleChiiSelection(mp, rect);
+      return;
+    }
+    
+    const action = clickAction(
+      mp.x - rect.x,
+      mp.y - rect.y,
+      this.canDoAChii().length > 0,
+      this.canDoAPon(),
+      false && this.level > 1,
+      false && this.level > 0,
+      false && this.level > 0
+    );
+    
+    if (this.canCall && action !== -1) {
+      this.handleCallAction(action);
+    } else if (this.turn === 0 && this.selectedTile !== undefined) {
+      this.handlePlayerDiscard();
+    }
+  }
 
-		this.drawGame();
-		this.ctx.clearRect(0, 0, this.cv.width, this.cv.height);
-		this.ctx.drawImage(this.staticCv, 0, 0);
-	}
+  private handleChiiSelection(mp: MousePos, rect: DOMRect): void {
+    const allChii = this.getChii(0);
+    const selection = clickChii(
+      mp.x - rect.x,
+      mp.y - rect.y,
+      allChii
+    );
+    
+    if (selection === 0) {
+      this.chooseChii = false;
+    } else {
+      this.chooseChii = false;
+      this.chii(selection, 0);
+    }
+  }
 
-	public getDeck(): Deck {
-		return this.deck;
-	}
+  private handleCallAction(action: number): void {
+    if (action === 0) { // Pass
+      this.canCall = false;
+      this.advanceTurn();
+    } else if (action === 1) { // Chii
+      const chiis = this.canDoAChii();
+      if (chiis.length === 1) {
+        this.chii(chiis[0], 0);
+      } else {
+        this.chooseChii = true;
+        this.drawGame();
+      }
+    } else if (action === 2) { // Pon
+      this.pon(this.turn);
+    }
+  }
 
-	public getHands(): Array<Hand> {
-		return this.hands;
-	}
+  private handlePlayerDiscard(): void {
+    this.discard(0, this.selectedTile as number);
+    
+    if (!this.checkPon()) {
+      const chiis = this.canDoAChii(1);
+      if (chiis.length > 0) {
+        const i = Math.floor(Math.random() * chiis.length);
+        this.chii(chiis[i], 1);
+      } else {
+        this.advanceTurn();
+      }
+    }
+  }
 
-	public isFinished(): boolean {
-		return this.end;
-	}
+  private advanceTurn(): void {
+    this.updateWaitingTime();
+    this.turn = (this.turn + 1) % GAME_CONSTANTS.PLAYERS;
+    this.hasPicked = false;
+    this.hasPlayed = false;
+  }
 
-	public click( // player is playing
-		mp: mousePos,
-	): void {
-		const rect = this.cv.getBoundingClientRect();
+  private getSelected(mp: MousePos): void {
+    const rect = this.cv.getBoundingClientRect();
+    const x = 2.5 * 75 * 0.75;
+    const y = 1050 - 250 * 0.6;
+    const sizeHand = GAME_CONSTANTS.DISPLAY.HAND_SIZE;
+    
+    const mouseX = mp.x - x;
+    const mouseY = mp.y;
+    const tileWidth = 83.9;
+    
+    const tileIndex = Math.floor(mouseX / (tileWidth * sizeHand));
+    const relativeX = mouseX - tileIndex * tileWidth * sizeHand;
+    
+    if (
+      relativeX <= (tileWidth - 3) * sizeHand &&
+      tileIndex >= 0 &&
+      tileIndex < this.hands[0].length() &&
+      mouseY >= y &&
+      mouseY <= y + 100 * sizeHand
+    ) {
+      this.selectedTile = tileIndex;
+    } else {
+      this.selectedTile = undefined;
+    }
+  }
 
-		if (this.hasWin(0)) {
-			this.end = true;
-			this.result = 1;
-		} else if (this.chooseChii) { // is choosing
-			let allChii = this.getChii(0);
-			let c = clickChii(
-				mp.x - rect.x,
-				mp.y - rect.y,
-				allChii
-			);	
-			if (c === 0) {
-				this.chooseChii = false;
-			} else {
-				this.chooseChii = false;
-				this.chii(c, 0);
-			}
-		} else {
-			let action = clickAction(
-				mp.x - rect.left,
-				mp.y - rect.top,
-				this.canDoAChii().length > 0,
-				this.canDoAPon(),
-				false && this.level > 1,
-				false && this.level > 0,
-				false && this.level > 0
-			);
+  private updateWaitingTime(): void {
+    this.waitingTime = Math.floor(
+      Math.random() * 
+      (GAME_CONSTANTS.WAITING_TIME.MAX - GAME_CONSTANTS.WAITING_TIME.MIN) + 
+      GAME_CONSTANTS.WAITING_TIME.MIN
+    );
+  }
 
-			if (this.canCall && action !== -1) { // can call
-				if (action === 0) { // pass
-					this.canCall = false;
-					if (this.turn === 3) {
-						this.turn = 0;
-						this.pick(0);
-					} else {
-						this.turn++;
-					}
-					this.updateWaitingTime();
-					this.hasPicked = false;
-					this.hasPlayed = false;
-				} else if (action === 1) { // chii
-					let chiis = this.canDoAChii();
-					if (chiis.length === 1) { // only one possible
-						this.chii(chiis[0], 0);
-					} else {
-						this.chooseChii = true;
-						this.drawGame();
-					}
-				} else if (action == 2) { // pon
-					this.pon(this.turn);
-				}
+  private play(): void {
+    if (this.turn !== 0 && !this.end) {
+      if (!this.hasPicked) {
+        // Begin of turn
+        this.lastPlayed = Date.now();
+        this.pick(this.turn);
+        this.hasPicked = true;
+      } else if (!this.hasPlayed) {
+        // Middle of turn
+        this.handleBotTurn();
+      } else if (!this.canCall) {
+        // End of turn
+        this.advanceBotTurn();
+      }
+    }
+  }
 
-			} else { // nothing unusual
-				if (this.turn === 0 && this.selectedTile !== undefined) {
-					this.discard(0, this.selectedTile as NonNullable<number>);
-					if (!this.checkPon()) {
-						let chiis = this.canDoAChii(1);
-						if (chiis.length > 0) {
-							let i = Math.floor(Math.random() * chiis.length);
-							this.chii(chiis[i], 1);
-						} else {
-							this.updateWaitingTime();
-							this.turn = (this.turn + 1) % 4;
-						}
-					}
-				}
-			}
-		}
-	}
+  private handleBotTurn(): void {
+    if (this.hasWin(this.turn)) {
+      this.end = true;
+      this.result = 2;
+      return;
+    }
+    
+    if (Date.now() - this.lastPlayed > this.waitingTime) {
+      this.lastPlayed = Date.now();
+      
+      // Choose random tile to discard
+      const n = Math.floor(this.hands[this.turn].length() * Math.random());
+      this.discard(this.turn, n);
+      this.hasPlayed = true;
+      
+      if (this.deck.length() <= 0) {
+        this.result = 0;
+        this.end = true;
+        return;
+      }
+      
+      if (!this.end) {
+        this.checkPon();
+        this.checkForChii();
+        this.canCall = this.canDoAChii().length > 0 || this.canDoAPon();
+      }
+    }
+  }
 
-	private getSelected(
-		mp: mousePos,
-	): void {
-		const rect = this.cv.getBoundingClientRect();
-		let x = 2.5 * 75 * 0.75;
-		let y = 1050 - 250 * 0.6;
-		
-		const mouseX = mp.x - rect.left - x;
-		const mouseY = mp.y - rect.top;
-		const s = 83.9;
+  private checkForChii(): void {
+    if (this.turn === 3) return;
+    
+    const nextPlayer = this.turn + 1;
+    const chiis = this.canDoAChii(nextPlayer);
+    
+    if (chiis.length > 0) {
+      const i = Math.floor(Math.random() * chiis.length);
+      this.chii(chiis[i], nextPlayer);
+    }
+  }
 
-		let q = Math.floor(mouseX / (s * this.sizeHand));
-		let r = mouseX - q * s * this.sizeHand;
-		if (
-			r <= (s - 3) * this.sizeHand &&
-			q >= 0 &&
-			q < this.hands[0].length() &&
-			mouseY >= y &&
-			mouseY <= y + 100 * this.sizeHand
-		) {
-			this.selectedTile = q;
-		} else {
-			this.selectedTile = undefined;
-		}
-	};
+  private advanceBotTurn(): void {
+    if (this.turn === 3) {
+      this.turn = 0;
+      this.pick(0);
+      if (this.hasWin(0)) {
+        this.end = true;
+        this.result = 1;
+      }
+    } else {
+      this.turn++;
+    }
+    
+    this.updateWaitingTime();
+    this.hasPicked = false;
+    this.hasPlayed = false;
+  }
 
-	private updateWaitingTime(): void {
-		this.waitingTime = 
-			Math.floor(
-				Math.random() *
-				(this.maxWaitingTime - this.minWaitingTime) +
-				this.minWaitingTime
-			);
-	}
+  private pick(player: number): void {
+    this.hands[player].push(this.deck.pop());
+    this.hands[player].isolate = true;
+  }
 
-	private play(): void {
-		if (
-			this.turn !== 0 && !this.end
-		) { // bot playing
-			if (!this.hasPicked) { // begin of his turn
-				this.lastPlayed = Date.now();
-				this.pick(this.turn);
-				this.hasPicked = true;
-			} else if (!this.hasPlayed) { // middle of his turn
-				if (this.hasWin(this.turn)) {
-					this.end = true;
-					this.result = 2;
-				} else if (Date.now() - this.lastPlayed > this.waitingTime) {
-					this.lastPlayed = Date.now();
-					let n = Math.floor(this.hands[this.turn].length() * Math.random());
-					this.discard(this.turn, n);
-					this.hasPlayed = true;
-					if (this.deck.length() <= 0) {
-						this.result = 0;
-						this.end = true;
-					}
-					if (!this.end) {
-						this.checkPon();
-						if (this.turn !== 3 && this.canDoAChii(this.turn + 1).length > 0) {
-							let chiis = this.canDoAChii(this.turn + 1);
-							let i = Math.floor(Math.random() * chiis.length);
-							this.chii(chiis[i], this.turn + 1);
-						}
-						this.canCall = this.canDoAChii().length > 0 || this.canDoAPon();
-					}
-				}
-			} else if (!this.canCall) { // end of his turn
-				if (this.turn === 3) {
-					this.turn = 0;
-					this.pick(0);
-					if (this.hasWin(0)) {
-						this.end = true;
-						this.result = 1;
-					}
-				} else {
-					this.turn++;
-				}
-				this.updateWaitingTime();
-				this.hasPicked = false;
-				this.hasPlayed = false;
-			}
-		}
-	}
+  private discard(player: number, n: number): void {
+    const tile = this.hands[player].eject(n);
+    this.hands[player].sort();
+    
+    tile.setTilt();
+    this.discards[player].push(tile);
+    
+    this.hands[player].isolate = false;
+    this.hands[player].sort();
+    
+    this.lastDiscard = player;
+    this.lastPlayed = Date.now();
+  }
 
-	private pick(player: number): void {
-		this.hands[player].push(this.deck.pop());
-		this.hands[player].isolate = true;
-	}
+  private canDoAChii(p: number = 0): Array<number> {
+    const chii: number[] = [];
+    
+    // Check if chii is possible
+    if (
+      this.lastDiscard === undefined ||
+      (this.lastDiscard + 1) % 4 !== p ||
+      (this.turn + 1) % 4 !== p ||
+      this.discards[this.lastDiscard][this.discards[this.lastDiscard].length - 1].getFamily() >= 4
+    ) {
+      return chii;
+    }
+    
+    const t = this.discards[this.lastDiscard][this.discards[this.lastDiscard].length - 1];
+    const h = this.hands[p];
+    const family = t.getFamily();
+    const value = t.getValue();
+    
+    // Check for three possible chii patterns
+    if (h.count(family, value - 2) > 0 && h.count(family, value - 1) > 0) {
+      chii.push(value - 2);
+    }
+    
+    if (h.count(family, value - 1) > 0 && h.count(family, value + 1) > 0) {
+      chii.push(value - 1);
+    }
+    
+    if (h.count(family, value + 1) > 0 && h.count(family, value + 2) > 0) {
+      chii.push(value);
+    }
+    
+    return chii;
+  }
 
-	private discard(player: number, n: number): void {
-		let tile = this.hands[player].eject(n);
-		this.hands[player].sort();
-		tile.setTilt();
-		this.discards[player].push(tile);
-		this.hands[player].isolate = false;
-		this.hands[player].sort();
-		this.lastDiscard = player;
-		this.lastPlayed = Date.now();
-	}
+  private chii(minValue: number, p: number): void {
+    const discardPlayer = p === 0 ? 3 : p - 1;
+    const t = this.discards[discardPlayer].pop() as Tile;
+    this.lastDiscard = undefined;
+    
+    const tt: Tile[] = [];
+    let tn = 0;
+    let v = minValue;
+    
+    // Find the right tiles for the chii
+    while (tn < 2) {
+      if (v === t.getValue()) {
+        v++;
+      } else {
+        tt[tn] = this.hands[p].find(t.getFamily(), v) as Tile;
+        tn++;
+        v++;
+      }
+    }
+    
+    // Set tilt for all tiles in the group
+    [t, tt[0], tt[1]].forEach(tile => tile.setTilt());
+    
+    // Create new group
+    this.groups[p].push(new Group([t, tt[0], tt[1]], discardPlayer, p));
+    
+    if (this.hasWin(p)) {
+      this.end = true;
+      this.result = p === 0 ? 1 : 2;
+    }
+    
+    this.updateWaitingTime();
+    this.turn = p;
+    this.hasPicked = true;
+    this.hasPlayed = false;
+  }
 
-	private canDoAChii(p: number = 0): Array<number> {
-		let chii = [] as Array<number>;
-		if (
-			this.lastDiscard !== undefined &&
-			(this.lastDiscard + 1) % 4 === p &&
-			(this.turn + 1) % 4  === p &&
-			this.discards[this.lastDiscard][this.discards[this.lastDiscard].length-1].getFamily() < 4
-		) {
-			let t = this.discards[this.lastDiscard][this.discards[this.lastDiscard].length-1];
-			let h = this.hands[p];
-			if (
-				h.count(t.getFamily(), t.getValue()-2) > 0 &&
-				h.count(t.getFamily(), t.getValue()-1) > 0
-			) {
-				chii.push(t.getValue()-2);
-			}
-			if (
-				h.count(t.getFamily(), t.getValue()-1) > 0 &&
-				h.count(t.getFamily(), t.getValue()+1) > 0
-			) {
-				chii.push(t.getValue()-1);
-			}
-			if (
-				h.count(t.getFamily(), t.getValue()+1) > 0 &&
-				h.count(t.getFamily(), t.getValue()+2) > 0
-			) {
-				chii.push(t.getValue());
-			}
-		}
-		return chii;
-	}
+  private getChii(p: number): Array<Array<Tile>> {
+    const chiis: Array<Array<Tile>> = [];
+    const numChii = this.canDoAChii();
+    const discardPlayer = p === 0 ? 3 : p - 1;
+    const d = this.discards[discardPlayer];
+    const t = d[d.length - 1];
+    
+    for (let i = 0; i < numChii.length; i++) {
+      const v = numChii[i];
+      const chii: Tile[] = [];
+      
+      for (let dv = 0; dv < 3; dv++) {
+        if (v + dv === t.getValue()) {
+          chii.push(t);
+        } else {
+          const tt = this.hands[p].find(t.getFamily(), v + dv) as Tile;
+          chii.push(tt);
+          this.hands[p].push(tt);
+          this.hands[p].sort();
+        }
+      }
+      
+      chiis.push(chii);
+    }
+    
+    return chiis;
+  }
 
-	private chii(minValue: number, p: number): void {
-		let t = this.discards[p === 0 ? 3 : p - 1].pop() as NonNullable<Tile>;
-		this.lastDiscard = undefined;
-		let tn = 0;
-		let v = minValue;
-		let tt: Array<Tile> = [];
-		while (tn < 2) {
-			if (v === t.getValue()) {
-				v++;
-			} else {
-				tt[tn] = this.hands[p].find(t.getFamily(), v) as NonNullable<Tile>;
-				tn++;
-				v++;
-			}
-		}
-		[t, tt[0], tt[1]].forEach(t => t.setTilt());
-		this.groups[p].push(new Group([t, tt[0], tt[1]], p === 0 ? 3 : p - 1, p));
+  private checkPon(): boolean {
+    for (let p = 1; p < GAME_CONSTANTS.PLAYERS; p++) {
+      if (this.canDoAPon(p)) {
+        this.pon(this.lastDiscard as number, p);
+        return true;
+      }
+    }
+    return false;
+  }
 
-		if (this.hasWin(p)) {
-			this.end = true;
-			this.result = p === 0 ? 1 : 2;
-		}
-		this.updateWaitingTime();
-		this.turn = p;
-		this.hasPicked = true;
-		this.hasPlayed = false;
-	}
+  private canDoAPon(player: number = 0): boolean {
+    if (
+      this.lastDiscard === undefined || 
+      this.lastDiscard === player || 
+      this.turn === player ||
+      (this.hasPicked && !this.hasPlayed)
+    ) {
+      return false;
+    }
+    
+    const t = this.discards[this.lastDiscard][this.discards[this.lastDiscard].length - 1];
+    return this.hands[player].count(t.getFamily(), t.getValue()) >= 2;
+  }
 
-	private getChii(p: number): Array<Array<Tile>> {
-		let chiis = [] as Array<Array<Tile>>;
-		let numChii = this.canDoAChii();
+  private pon(p: number, thief: number = 0): void {
+    const t = this.discards[p].pop() as Tile;
+    this.lastDiscard = undefined;
+    
+    const t2 = this.hands[thief].find(t.getFamily(), t.getValue()) as Tile;
+    const t3 = this.hands[thief].find(t.getFamily(), t.getValue()) as Tile;
+    
+    [t, t2, t3].forEach(tile => tile.setTilt());
+    
+    this.groups[thief].push(new Group([t, t2, t3], p, thief));
+    
+    if (this.hasWin(thief)) {
+      this.end = true;
+      this.result = thief === 0 ? 1 : 2;
+    }
+    
+    this.updateWaitingTime();
+    this.turn = thief;
+    this.hasPicked = true;
+    this.hasPlayed = false;
+  }
 
-		let d = this.discards[p === 0 ? 3 : p - 1];
-		let t = d[d.length - 1]
+  private hasWin(p: number): boolean {
+    return this.hands[p].toGroup() !== undefined;
+  }
 
-		for (let i = 0; i < numChii.length; i++) {
-			let v = numChii[i];
-			let chii = [];
-			for (let dv = 0; dv < 3; dv++) {
-				if (v + dv === t.getValue()) {
-					chii.push(t);
-				} else {
-					let tt = this.hands[p].find(t.getFamily(), v + dv) as NonNullable<Tile>;
-					chii.push(tt);
-					this.hands[p].push(tt);
-					this.hands[p].sort();
-				}
-			}
-			chiis.push(chii);
-		}
-		return chiis;
-	}
+  private drawGame(): void {
+    // Update game state
+    this.play();
+    
+    // Draw game elements
+    drawState(this.staticCtx, this.turn);
+    this.drawDiscardSize();
+    this.drawResult();
+    this.drawHands();
+    this.drawGroups(GAME_CONSTANTS.DISPLAY.GROUP_SIZE);
+    
+    // Draw discards for all players
+    for (let i = 0; i < GAME_CONSTANTS.PLAYERS; i++) {
+      this.drawDiscard(
+        i,
+        this.selectedTile !== undefined ? this.hands[0].get(this.selectedTile) : undefined
+      );
+    }
+    
+    // Draw UI elements
+    if (this.chooseChii) {
+      drawChiis(this.staticCtx, this.getChii(0));
+    } else {
+      drawButtons(
+        this.staticCtx,
+        this.canDoAChii().length > 0,
+        this.canDoAPon(),
+        false && this.level > 1,
+        false && this.level > 0,
+        false && this.level > 0
+      );
+    }
+  }
 
-	private checkPon(): boolean {
-		for (var p = 1; p < 4; p++) {
-			if (this.canDoAPon(p)) {
-				this.pon(this.lastDiscard as NonNullable<number>, p);
-				return true;
-			}
-		}
-		return false;
-	}
+  private drawHands(): void {
+    const showHands = false;
+    const { HAND_SIZE, HIDDEN_HAND_SIZE } = GAME_CONSTANTS.DISPLAY;
+    
+    // Draw player's hand
+    this.hands[0].drawHand(
+      this.staticCtx,
+      2.5 * 75 * 0.75,
+      1000 - 150 * HAND_SIZE,
+      5 * HAND_SIZE,
+      0.75,
+      this.selectedTile,
+      false,
+      0
+    );
+    
+    // Draw opponents' hands
+    this.hands[1].drawHand(
+      this.staticCtx,
+      1000 - 150 * HIDDEN_HAND_SIZE,
+      1000 - 75 * 5 * HIDDEN_HAND_SIZE,
+      5 * HIDDEN_HAND_SIZE,
+      HIDDEN_HAND_SIZE,
+      undefined,
+      !showHands,
+      -GAME_CONSTANTS.PI / 2
+    );
+    
+    this.hands[2].drawHand(
+      this.staticCtx,
+      1000 - 75 * 5 * HIDDEN_HAND_SIZE,
+      150 * HIDDEN_HAND_SIZE,
+      5 * HIDDEN_HAND_SIZE,
+      HIDDEN_HAND_SIZE,
+      undefined,
+      !showHands,
+      -GAME_CONSTANTS.PI
+    );
+    
+    this.hands[3].drawHand(
+      this.staticCtx,
+      150 * HIDDEN_HAND_SIZE,
+      75 * 5 * HIDDEN_HAND_SIZE,
+      5 * HIDDEN_HAND_SIZE,
+      HIDDEN_HAND_SIZE,
+      undefined,
+      !showHands,
+      GAME_CONSTANTS.PI / 2
+    );
+  }
 
-	private canDoAPon(player: number = 0): boolean {
-		if (
-			this.lastDiscard !== undefined && // il y a une défausse
-			this.lastDiscard !== player && // pas sa propre défausse
-			this.turn !== player && // pas son propre tour
-			!(this.hasPicked && !this.hasPlayed) // pas un joueur en train de jouer
-		) {
-			let t = this.discards[this.lastDiscard][this.discards[this.lastDiscard].length-1];
-			return this.hands[player].count(t.getFamily(), t.getValue()) >= 2;
-		} else {
-			return false;
-		}
-	}
+  private drawGroups(size: number): void {
+    const offset = 25;
+    
+    for (let p = 0; p < GAME_CONSTANTS.PLAYERS; p++) {
+      const rotation = this.rotations[p];
+      const groups = this.groups[p];
+      
+      if (groups.length > 0) {
+        for (let i = groups.length - 1; i >= 0; i--) {
+          groups[i].drawGroup(
+            this.staticCtx,
+            1050 - 240 - (260 + offset) * size * i,
+            1050 - 62,
+            5,
+            0.6,
+            rotation,
+            this.selectedTile !== undefined ? this.hands[0].get(this.selectedTile) : undefined
+          );
+        }
+      }
+    }
+  }
 
-	private pon(p: number, thief: number = 0): void {
-		let t = this.discards[p].pop() as NonNullable<Tile>;
-		this.lastDiscard = undefined;
-		let t2 = this.hands[thief].find(t.getFamily(), t.getValue()) as NonNullable<Tile>;
-		let t3 = this.hands[thief].find(t.getFamily(), t.getValue()) as NonNullable<Tile>;
-		[t, t2, t3].forEach(t => t.setTilt());
-		this.groups[thief].push(new Group([t, t2, t3], p, thief));
+  private drawDiscard(p: number, highlightedTile: Tile | undefined): void {
+    const sizeDiscard = GAME_CONSTANTS.DISPLAY.DISCARD_SIZE;
+    
+    this.staticCtx.save();
+    this.staticCtx.translate(525, 525);
+    this.staticCtx.rotate(this.rotations[p]);
+    
+    const x = -sizeDiscard * 475 / 2;
+    const y = sizeDiscard * (475 / 2 + 5);
+    
+    // Draw all discarded tiles
+    for (let i = 0; i < this.discards[p].length; i++) {
+      const tile = this.discards[p][i];
+      let tx, ty;
+      
+      if (i < 12) {
+        tx = x + (i % 6) * 80 * sizeDiscard;
+        ty = y + Math.floor(i / 6) * 105 * sizeDiscard;
+      } else {
+        tx = x + (i - 12) * 80 * sizeDiscard;
+        ty = y + 2 * 105 * sizeDiscard;
+      }
+      
+      tile.drawTile(
+        this.staticCtx,
+        tx,
+        ty,
+        sizeDiscard,
+        false,
+        0,
+        highlightedTile?.isEqual(tile.getFamily(), tile.getValue())
+      );
+    }
+    
+    // Draw indicator for last discard
+    if (this.lastDiscard === p) {
+      this.drawLastDiscardIndicator(p);
+    }
+    
+    this.staticCtx.restore();
+  }
 
-		if (this.hasWin(thief)) {
-			this.end = true;
-			this.result = thief === 0 ? 1 : 2;
-		}
-		this.updateWaitingTime();
-		this.turn = thief;
-		this.hasPicked = true;
-		this.hasPlayed = false;
-	}
+  private drawLastDiscardIndicator(p: number): void {
+    const j = this.discards[p].length - 1;
+    const sizeDiscard = GAME_CONSTANTS.DISPLAY.DISCARD_SIZE;
+    const x = -sizeDiscard * 475 / 2;
+    const y = sizeDiscard * (475 / 2 + 5);
+    
+    let tx = j < 12 
+      ? x + (j % 6) * 80 * sizeDiscard 
+      : x + (j - 12) * 80 * sizeDiscard;
+      
+    let ty = j < 12
+      ? y + Math.floor(j / 6) * 105 * sizeDiscard
+      : y + 2 * 105 * sizeDiscard;
+    
+    tx += 75 / 2 * sizeDiscard;
+    ty += 115 * sizeDiscard;
+    
+    const triangleSize = 10;
+    this.staticCtx.fillStyle = "#ff0000";
+    this.staticCtx.beginPath();
+    this.staticCtx.moveTo(tx, ty);
+    this.staticCtx.lineTo(tx + triangleSize / 2, ty + 0.866 * triangleSize);
+    this.staticCtx.lineTo(tx - triangleSize / 2, ty + 0.866 * triangleSize);
+    this.staticCtx.lineTo(tx, ty);
+    this.staticCtx.fill();
+    this.staticCtx.stroke();
+  }
 
-	private hasWin(p: number): boolean {
-		return this.hands[p].toGroup() !== undefined
-	}
+  private drawDiscardSize(): void {
+    this.staticCtx.fillStyle = "#f070f0";
+    this.staticCtx.font = "40px garamond";
+    
+    const remainingTiles = this.deck.length();
+    const x = remainingTiles < 10 ? 517 : 507;
+    
+    this.staticCtx.fillText(remainingTiles.toString(), x, 537);
+  }
 
-	private drawGame(): void {
-		// update game
-		this.play();
+  private drawResult(): void {
+    if (this.result === -1) return;
+    
+    // Draw result background
+    this.staticCtx.fillStyle = "#e0e0f0";
+    this.staticCtx.fillRect(450, 430, 150, 190);
+    this.staticCtx.fillRect(430, 450, 190, 150);
+    
+    // Draw result text
+    this.staticCtx.fillStyle = "#ff0000";
+    this.staticCtx.font = "45px garamond";
+    
+    if (this.result === 0) {
+      this.staticCtx.fillText("Égalité", 450, 535);
+    } else if (this.result === 1) {
+      this.staticCtx.fillText("Victoire !", 440, 535);
+    } else if (this.result === 2) {
+      this.staticCtx.fillText("Défaite...", 440, 535);
+    }
+  }
 
-		// draw winds, discard, riichi etc...
-		drawState(this.staticCtx, this.turn);
-		this.drawDiscardSize();
-
-		// draw result
-		this.drawResult();
-
-		// hands
-		this.drawHands();
-	
-		// groups
-		this.drawGroups(0.6);
-
-		// discards
-		for (let i = 0; i < 4; i++) {
-			this.drawDiscard(
-				i,
-				this.hands[0].get(this.selectedTile) as NonNullable<Tile>
-			);
-		}
-
-		// called
-		if (this.chooseChii) {
-			drawChiis(this.staticCtx, this.getChii(0));
-		} else {
-			drawButtons(
-				this.staticCtx,
-				this.canDoAChii().length > 0,
-				this.canDoAPon(),
-				false && this.level > 1,
-				false && this.level > 0,
-				false && this.level > 0
-			);
-		}
-	}
-
-	private drawHands() {
-		const pi = 3.141592;
-		const showHands = false;
-		
-		this.hands[0].drawHand(
-			this.staticCtx,
-			2.5 * 75 * 0.75,
-			1000 - 150 * this.sizeHand,
-			5 * this.sizeHand,
-			0.75,
-			this.selectedTile,
-			false,
-			0
-		);
-		this.hands[1].drawHand(
-			this.staticCtx,
-			1000 - 150 * this.sizeHiddenHand,
-			1000 - 75 * 5 * this.sizeHiddenHand,
-			5 * this.sizeHiddenHand,
-			this.sizeHiddenHand,
-			undefined,
-			!showHands,
-			- pi / 2
-		);
-		this.hands[2].drawHand(
-			this.staticCtx,
-			1000 - 75 * 5 * this.sizeHiddenHand,
-			150 * this.sizeHiddenHand,
-			5 * this.sizeHiddenHand,
-			this.sizeHiddenHand,
-			undefined,
-			!showHands,
-			- pi
-		);
-		this.hands[3].drawHand(
-			this.staticCtx,
-			150 * this.sizeHiddenHand,
-			75 * 5 * this.sizeHiddenHand,
-			5 * this.sizeHiddenHand,
-			this.sizeHiddenHand,
-			undefined,
-			!showHands,
-			pi / 2
-		);
-
-	}
-
-	private drawGroups(
-		size: number,
-	): void {
-		let os = 25;
-		const pi = 3.141592;
-		for ( let p = 0; p < 4; p++) {
-			let rotation = [0, -pi / 2, -pi, pi / 2][p];
-			if (this.groups[p].length > 0) {
-				for (let i = this.groups[p].length-1; i >= 0; i--) {
-					this.groups[p][i].drawGroup(
-						this.staticCtx,
-						1050 - 240 - (260 + os) * size * i,
-						1050 - 62,
-						5,
-						0.6,
-						rotation,
-						this.hands[0].get(this.selectedTile)
-					);
-				}
-			}
-		}
-	}
-
-	private drawDiscard(
-		p: number,
-		highlitedTile: Tile|undefined
-	): void {
-		const pi = 3.141592;
-
-		this.staticCtx.save();
-		this.staticCtx.translate(525, 525);
-		this.staticCtx.rotate([0, -pi/2, -pi, pi/2][p])
-
-		let x = - this.sizeDiscard * 475 / 2;
-		let y = this.sizeDiscard * (475 / 2 + 5);
-		for (let i = 0; i < this.discards[p].length; i++) {
-			let tile = this.discards[p][i];
-			if (i < 12) {
-				tile.drawTile(
-					this.staticCtx,
-					x + (i % 6) * 80 * this.sizeDiscard,
-					y + Math.floor(i / 6) * 105 * this.sizeDiscard,
-					this.sizeDiscard,
-					false,
-					0,
-					highlitedTile?.isEqual(tile.getFamily(), tile.getValue())
-				);
-			} else {
-				tile.drawTile(
-					this.staticCtx,
-					x + (i - 12) * 80 * this.sizeDiscard,
-					y + 2 * 105 * this.sizeDiscard,
-					this.sizeDiscard,
-					false,
-					0,
-					highlitedTile?.isEqual(tile.getFamily(), tile.getValue())
-				);
-			}
-		}
-		if (this.lastDiscard === p) {
-			const j = this.discards[p].length - 1;
-			let tx =
-				j < 12 ?
-				x + (j % 6) * 80 * this.sizeDiscard :
-				x + (j - 12) * 80 * this.sizeDiscard;
-			let ty =
-				j < 12 ?
-				y + Math.floor(j / 6) * 105 * this.sizeDiscard :
-				y + 2 * 105 * this.sizeDiscard;
-			tx += 75 / 2 * this.sizeDiscard;
-			ty += 115 * this.sizeDiscard;
-			const ts = 10;
-			this.staticCtx.fillStyle = "#ff0000";
-			this.staticCtx.beginPath();
-			this.staticCtx.moveTo(tx, ty);
-
-			this.staticCtx.lineTo(tx + ts/2, ty + 0.866 * ts);
-			this.staticCtx.lineTo(tx - ts/2, ty + 0.866 * ts);
-			this.staticCtx.lineTo(tx, ty);
-
-			this.staticCtx.fill();
-			this.staticCtx.stroke();
-		}
-
-		this.staticCtx.restore();
-	}
-
-	private drawDiscardSize() {
-		this.staticCtx.fillStyle = "#f070f0";
-
-		this.staticCtx.font = "40px garamond";
-		let l = this.deck.length();
-		if (l < 10) {
-			this.staticCtx.fillText(l.toString(), 517, 537);
-		} else {
-			this.staticCtx.fillText(l.toString(), 507, 537);
-		}
-	}
-
-	private drawResult(): void {
-		if (this.result !== -1) {
-			this.staticCtx.fillStyle = "#e0e0f0";
-			this.staticCtx.fillRect(450, 430, 150, 190);
-			this.staticCtx.fillRect(430, 450, 190, 150);
-			this.staticCtx.fillStyle = "#ff0000";
-			this.staticCtx.font = "45px garamond";
-
-		}
-		if (this.result === 0) { // Égalité
-			this.staticCtx.fillText("Égalité", 450, 535);
-		} else if (this.result === 1) { // victoire
-			this.staticCtx.fillText("Victoire !", 440, 535);
-		} else if (this.result === 2) { // Défaite
-			this.staticCtx.fillText("Défaite...", 440, 535);
-		}
-	}
-
-	public async preload(): Promise<void> {
-		await this.deck.preload();
-		await Promise.all(this.hands.map(h => h.preload()));
-	}
-	
+  public async preload(): Promise<void> {
+    await this.deck.preload();
+    await Promise.all(this.hands.map(h => h.preload()));
+  }
 }

@@ -1,277 +1,311 @@
-import { Tile } from "./tile"
+import { Tile } from "./tile";
 
-type button_t = (
-	arg0: CanvasRenderingContext2D,
-	arg1: number,
-	arg2: number
+/**
+ * Type definition for button rendering functions
+ */
+type ButtonRenderer = (
+  ctx: CanvasRenderingContext2D,
+  x: number,
+  y: number
 ) => void;
 
+/**
+ * Button configuration interface
+ */
+interface ButtonConfig {
+  text: string;
+  color: string;
+  action: number;
+}
+
+// Button constants
+const BUTTON_RADIUS = 8;
+const BUTTON_WIDTH = 110;
+const BUTTON_HEIGHT = 50;
+const BUTTON_SPACING = 120;
+const BUTTON_AREA_Y_MIN = 838;
+const BUTTON_AREA_Y_MAX = 888;
+const BUTTON_MARGIN = 10;
+const BASE_X_POSITION = 850;
+
+// Button style configurations
+const BUTTON_STYLES: Record<string, ButtonConfig> = {
+  pass: { text: "Ignorer", color: "#FF9030", action: 0 },
+  chii: { text: "Chii", color: "#FFCC33", action: 1 },
+  pon: { text: "Pon", color: "#FFCC33", action: 2 },
+  kan: { text: "Kan", color: "#FFCC33", action: 3 },
+  ron: { text: "Ron", color: "#FF3060", action: 4 },
+  tsumo: { text: "Tsumo", color: "#FF3060", action: 5 },
+  back: { text: "Retour", color: "#FF9030", action: 0 }
+};
+
+/**
+ * Determines which button was clicked based on coordinates
+ * @returns The action value of the clicked button or -1 if no button was clicked
+ */
 export function clickAction(
-	x: number,
-	y: number,
-	chii: boolean,
-	pon: boolean,
-	kan: boolean,
-	ron: boolean,
-	tsumo: boolean
+  x: number,
+  y: number,
+  chii: boolean,
+  pon: boolean,
+  kan: boolean,
+  ron: boolean,
+  tsumo: boolean
 ): number {
-	let buttons = [
-		[tsumo, 5],
-		[ron, 4],
-		[kan, 3],
-		[pon, 2],
-		[chii, 1]
-	]
-	if (buttons.some(c => c[0])) {
-		buttons.push([true, 0]);
-	} else {
-		return -1;
-	}
-	let xmin = 960 - buttons.filter(c => c[0]).length * 120;
-	let inside = 838 < y && y < 888;
-	let q = Math.floor((x - xmin) / 120);
-	let r = (x - xmin) - 120 * q;
-	if (
-		q >= 0 &&
-		q < buttons.filter(c => c[0]).length &&
-		r > 10 &&
-		inside
-	) {
-		return buttons.filter(c => c[0])[q][1] as number;
-	}
-	return -1;
+  const activeButtons = getActiveButtons(chii, pon, kan, ron, tsumo);
+  
+  if (activeButtons.length === 0) {
+    return -1;
+  }
+
+  // Calculate starting X position based on number of buttons
+  const xmin = 960 - activeButtons.length * BUTTON_SPACING;
+  
+  // Check if Y coordinate is within button area
+  const isYInButtonArea = BUTTON_AREA_Y_MIN < y && y < BUTTON_AREA_Y_MAX;
+  if (!isYInButtonArea) {
+    return -1;
+  }
+  
+  // Calculate which button was clicked
+  const buttonIndex = Math.floor((x - xmin) / BUTTON_SPACING);
+  const xOffset = (x - xmin) - BUTTON_SPACING * buttonIndex;
+  
+  if (
+    buttonIndex >= 0 &&
+    buttonIndex < activeButtons.length &&
+    xOffset > BUTTON_MARGIN
+  ) {
+    return activeButtons[buttonIndex];
+  }
+  
+  return -1;
 }
 
+/**
+ * Draw all active buttons on the canvas
+ */
 export function drawButtons(
-	ctx: CanvasRenderingContext2D,
-	chii: boolean,
-	pon: boolean,
-	kan: boolean,
-	ron: boolean,
-	tsumo: boolean
+  ctx: CanvasRenderingContext2D,
+  chii: boolean,
+  pon: boolean,
+  kan: boolean,
+  ron: boolean,
+  tsumo: boolean
 ): void {
-	let buttons = [
-		[chii, buttonChii],
-		[pon, buttonPon],
-		[kan, buttonKan],
-		[ron, buttonRon],
-		[tsumo, buttonTsumo]
-	]
-	if (buttons.some(c => c[0])) {
-		buttons.unshift([true, buttonPass]);
-	}
-	let dx = 0;
-	for (let i = 0; i < buttons.length; i++) {
-		if (buttons[i][0]) {
-			(buttons[i][1] as button_t)(
-				ctx,
-				850 - dx * 120,
-				835
-			);
-			dx++;
-		}
-	}
+  const buttonFunctions: [boolean, ButtonRenderer][] = [
+    [chii, (ctx, x, y) => renderButton(ctx, x, y, BUTTON_STYLES.chii)],
+    [pon, (ctx, x, y) => renderButton(ctx, x, y, BUTTON_STYLES.pon)],
+    [kan, (ctx, x, y) => renderButton(ctx, x, y, BUTTON_STYLES.kan)],
+    [ron, (ctx, x, y) => renderButton(ctx, x, y, BUTTON_STYLES.ron)],
+    [tsumo, (ctx, x, y) => renderButton(ctx, x, y, BUTTON_STYLES.tsumo)]
+  ];
+  
+  // Only show the pass button if at least one other button is active
+  const hasActiveButtons = buttonFunctions.some(([isActive]) => isActive);
+  
+  if (hasActiveButtons) {
+    buttonFunctions.unshift([true, (ctx, x, y) => renderButton(ctx, x, y, BUTTON_STYLES.pass)]);
+  } else {
+    return; // No buttons to draw
+  }
+  
+  // Draw active buttons
+  let positionOffset = 0;
+  for (const [isActive, renderFunc] of buttonFunctions) {
+    if (isActive) {
+      renderFunc(
+        ctx,
+        BASE_X_POSITION - positionOffset * BUTTON_SPACING,
+        835
+      );
+      positionOffset++;
+    }
+  }
 }
 
+/**
+ * Determines which Chi option was clicked
+ * @returns The value of the clicked Chi option or -1 if no option was clicked
+ */
 export function clickChii(
-	x: number,
-	y: number,
-	chiis: Array<Array<Tile>>
+  x: number,
+  y: number,
+  chiis: Array<Array<Tile>>
 ): number {
-	let xmin = 960 - (chiis.length + 1) * 120;
-	let inside = 838 < y && y < 888;
-	let q = Math.floor((x - xmin) / 120);
-	let r = (x - xmin) - 120 * q;
-	if (
-		q >= 0 &&
-		q < (chiis.length + 1) &&
-		r > 10 &&
-		inside
-	) {
-		return q === chiis.length ? 0 : chiis[q][0].getValue();
-	}
-	return -1;
+  if (chiis.length === 0) {
+    return -1;
+  }
+  
+  // Calculate starting X position based on number of options
+  const xmin = 960 - (chiis.length + 1) * BUTTON_SPACING;
+  
+  // Check if Y coordinate is within button area
+  const isYInButtonArea = BUTTON_AREA_Y_MIN < y && y < BUTTON_AREA_Y_MAX;
+  if (!isYInButtonArea) {
+    return -1;
+  }
+  
+  // Calculate which option was clicked
+  const optionIndex = Math.floor((x - xmin) / BUTTON_SPACING);
+  const xOffset = (x - xmin) - BUTTON_SPACING * optionIndex;
+  
+  if (
+    optionIndex >= 0 &&
+    optionIndex < (chiis.length + 1) &&
+    xOffset > BUTTON_MARGIN
+  ) {
+    // Return 0 for "back" button or the value of the selected Chi option
+    return optionIndex === chiis.length ? 0 : chiis[optionIndex][0].getValue();
+  }
+  
+  return -1;
 }
 
+/**
+ * Draw Chi options on the canvas
+ */
 export function drawChiis(
-	ctx: CanvasRenderingContext2D,
-	chiis: Array<Array<Tile>>
+  ctx: CanvasRenderingContext2D,
+  chiis: Array<Array<Tile>>
 ): void {
-	chiis.reverse();
-	const r = 8;
-	const w = 110;
-	const h = 50;
-	button(ctx, 850, 835, r, w, h, "#FF9030");
-	ctx.fillStyle = "black";
-	ctx.font = "30px garamond";
-	ctx.fillText("Retour", 850 + w * 0.1, 835 + h/2 * 1.3);
-	
-	let dx = 1;
-	for (let i = 0; i < chiis.length; i++) {
-		drawOneChii(
-			ctx,
-			850 - dx * 120,
-			835,
-			chiis[i]
-		);
-		dx++;
-	}
+  // Create a copy to avoid modifying the original array
+  const chiiOptions = [...chiis].reverse();
+  
+  // Draw "back" button
+  renderButton(ctx, BASE_X_POSITION, 835, BUTTON_STYLES.back);
+  
+  // Draw Chi options
+  let positionOffset = 1;
+  for (const tiles of chiiOptions) {
+    drawOneChii(
+      ctx,
+      BASE_X_POSITION - positionOffset * BUTTON_SPACING,
+      835,
+      tiles
+    );
+    positionOffset++;
+  }
 }
 
+/**
+ * Draw a single Chi option
+ */
 function drawOneChii(
-	ctx: CanvasRenderingContext2D,
-	x: number,
-	y: number,
-	tiles: Array<Tile>
+  ctx: CanvasRenderingContext2D,
+  x: number,
+  y: number,
+  tiles: Array<Tile>
 ): void {
-	const r = 8;
-	const w = 110;
-	const h = 50;
-	const dx = 32;
-	const x0 = x + 7;
-	const y0 = y + 5;
-	button(ctx, x, y, r, w, h, "#FFCC33");
-	tiles[0].drawTile(
-		ctx,
-		x0,
-		y0,
-		0.4,
-		false,
-		0,
-		false,
-		false
-	);
-	tiles[1].drawTile(
-		ctx,
-		x0 + dx,
-		y0,
-		0.4,
-		false,
-		0,
-		false,
-		false
-	);
-	tiles[2].drawTile(
-		ctx,
-		x0 + 2 * dx,
-		y0,
-		0.4,
-		false,
-		0,
-		false,
-		false
-	);
+  const tileOffset = 32;
+  const tileStartX = x + 7;
+  const tileStartY = y + 5;
+  
+  // Draw the button background
+  drawButtonShape(ctx, x, y, BUTTON_RADIUS, BUTTON_WIDTH, BUTTON_HEIGHT, BUTTON_STYLES.chii.color);
+  
+  // Draw the tiles
+  for (let i = 0; i < tiles.length; i++) {
+    tiles[i].drawTile(
+      ctx,
+      tileStartX + tileOffset * i,
+      tileStartY,
+      0.4,
+      false,
+      0,
+      false,
+      false
+    );
+  }
 }
 
-function button(
-	ctx: CanvasRenderingContext2D,
-	x: number,
-	y: number,
-	r: number,
-	w: number,
-	h: number,
-	color: string
-): void {
-	ctx.fillStyle = color;
-	ctx.beginPath();
-
-	ctx.moveTo(x + r, y);
-	ctx.lineTo(x + w - r, y);
-	ctx.quadraticCurveTo(x + w, y, x + w, y + r);
-	ctx.lineTo(x + w, y + h - r);
-	ctx.quadraticCurveTo(x + w, y + h, x + w - r, y + h);
-	ctx.lineTo(x + r, y + h);
-	ctx.quadraticCurveTo(x, y + h, x, y + h - r);
-	ctx.lineTo(x, y + r);
-	ctx.quadraticCurveTo(x, y, x + r, y);
-
-	ctx.fill();
-
-	ctx.fillStyle = "#606060";
-	ctx.stroke();
+/**
+ * Get the list of active button action values
+ */
+function getActiveButtons(
+  chii: boolean,
+  pon: boolean,
+  kan: boolean,
+  ron: boolean,
+  tsumo: boolean
+): number[] {
+  const buttonConfigs: [boolean, number][] = [
+    [tsumo, BUTTON_STYLES.tsumo.action],
+    [ron, BUTTON_STYLES.ron.action],
+    [kan, BUTTON_STYLES.kan.action],
+    [pon, BUTTON_STYLES.pon.action],
+    [chii, BUTTON_STYLES.chii.action]
+  ];
+  
+  const activeButtons = buttonConfigs
+    .filter(([isActive]) => isActive)
+    .map(([, action]) => action);
+  
+  // Add pass button if any other buttons are active
+  if (activeButtons.length > 0) {
+    activeButtons.push(BUTTON_STYLES.pass.action);
+  }
+  
+  return activeButtons;
 }
 
-function buttonPass(
-	ctx: CanvasRenderingContext2D,
-	x: number,
-	y: number
+/**
+ * Render a button with text
+ */
+function renderButton(
+  ctx: CanvasRenderingContext2D,
+  x: number,
+  y: number,
+  config: ButtonConfig
 ): void {
-	const r = 8;
-	const w = 110;
-	const h = 50;
-	// button(ctx, x, y, r, w, h, "#FFAC4D");
-	button(ctx, x, y, r, w, h, "#FF9030");
-	ctx.fillStyle = "black";
-	ctx.font = "30px garamond";
-	ctx.fillText("Ignorer", x + w * 0.1, y + h/2 * 1.3);
+  drawButtonShape(ctx, x, y, BUTTON_RADIUS, BUTTON_WIDTH, BUTTON_HEIGHT, config.color);
+  
+  // Add text to the button
+  ctx.fillStyle = "black";
+  ctx.font = "30px garamond";
+  
+  // Center text based on its length
+  const textXPosition = x + BUTTON_WIDTH * (0.5 - config.text.length * 0.025);
+  const textYPosition = y + BUTTON_HEIGHT/2 * 1.3;
+  
+  ctx.fillText(config.text, textXPosition, textYPosition);
 }
 
-function buttonPon(
-	ctx: CanvasRenderingContext2D,
-	x: number,
-	y: number
+/**
+ * Draw a rounded rectangle button shape
+ */
+function drawButtonShape(
+  ctx: CanvasRenderingContext2D,
+  x: number,
+  y: number,
+  radius: number,
+  width: number,
+  height: number,
+  color: string
 ): void {
-	const r = 8;
-	const w = 110;
-	const h = 50;
-	button(ctx, x, y, r, w, h, "#FFCC33");
-	ctx.fillStyle = "black";
-	ctx.font = "30px garamond";
-	ctx.fillText("Pon",x + w * 0.28, y + h/2 * 1.3);
-}
+  ctx.fillStyle = color;
+  ctx.beginPath();
 
-function buttonChii(
-	ctx: CanvasRenderingContext2D,
-	x: number,
-	y: number
-): void {
-	const r = 8;
-	const w = 110;
-	const h = 50;
-	button(ctx, x, y, r, w, h, "#FFCC33");
-	ctx.fillStyle = "black";
-	ctx.font = "30px garamond";
-	ctx.fillText("Chii",x + w * 0.25, y + h/2 * 1.3);
-}
+  // Top right corner
+  ctx.moveTo(x + radius, y);
+  ctx.lineTo(x + width - radius, y);
+  ctx.quadraticCurveTo(x + width, y, x + width, y + radius);
+  
+  // Bottom right corner
+  ctx.lineTo(x + width, y + height - radius);
+  ctx.quadraticCurveTo(x + width, y + height, x + width - radius, y + height);
+  
+  // Bottom left corner
+  ctx.lineTo(x + radius, y + height);
+  ctx.quadraticCurveTo(x, y + height, x, y + height - radius);
+  
+  // Top left corner
+  ctx.lineTo(x, y + radius);
+  ctx.quadraticCurveTo(x, y, x + radius, y);
 
-function buttonKan(
-	ctx: CanvasRenderingContext2D,
-	x: number,
-	y: number
-): void {
-	const r = 8;
-	const w = 110;
-	const h = 50;
-	button(ctx, x, y, r, w, h, "#FFCC33");
-	ctx.fillStyle = "black";
-	ctx.font = "30px garamond";
-	ctx.fillText("Kan",x + w * 0.28, y + h/2 * 1.3);
-}
+  ctx.fill();
 
-function buttonRon(
-	ctx: CanvasRenderingContext2D,
-	x: number,
-	y: number
-): void {
-	const r = 8;
-	const w = 110;
-	const h = 50;
-	button(ctx, x, y, r, w, h, "#FF3060");
-	ctx.fillStyle = "black";
-	ctx.font = "30px garamond";
-	ctx.fillText("Ron",x + w * 0.28, y + h/2 * 1.3);
-}
-
-function buttonTsumo(
-	ctx: CanvasRenderingContext2D,
-	x: number,
-	y: number
-): void {
-	const r = 8;
-	const w = 110;
-	const h = 50;
-	button(ctx, x, y, r, w, h, "#FF3060");
-	ctx.fillStyle = "black";
-	ctx.font = "30px garamond";
-	ctx.fillText("Tsumo",x + w * 0.13, y + h/2 * 1.3);
+  // Add border
+  ctx.fillStyle = "#606060";
+  ctx.stroke();
 }
