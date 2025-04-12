@@ -11,10 +11,10 @@ function ord(g: Group): boolean {
 
 function term(g: Group): boolean {
 	return g.getTiles().every(
-		t => {
+		t =>
 			t.getFamily() < 4 &&
 			(t.getValue() === 1 ||
-			 t.getValue() === 9)}
+			 t.getValue() === 9)
 	);
 }
 
@@ -488,13 +488,9 @@ chinroutou: function(
 	groups: Array<Group>,
 	wind: number
 ): number {
-	let h = hand.toGroup();
-	if (h === undefined) {
-		return 0;
-	}
+	let gr = groups.concat(hand.toGroup() as NonNullable<Array<Group>>);
 	if (
-		groups.every(g => term(g)) &&
-		h.every(g => term(g))
+		gr.every(g => term(g))
 	) {
 		return 13;
 	}
@@ -654,23 +650,70 @@ suuankou: function(
 	return 0;
 },
 
-sanshokuDoukou: function( //TODO
-	/**
-	 * triple brelan
-	 * 2/2
-	 */
+/**
+ * triple brelan
+ * 2/2
+ */
+sanshokuDoukou: function(
 	hand: Hand,
 	groups: Array<Group>,
 	wind: number
 ): number {
-	return 0;
+	let h = hand.toGroup();
+	let gr = [];
+	if (h !== undefined) {
+		gr = groups.concat(h);
+	} else {
+		gr = groups;
+	}
+	gr = gr.filter(g => pon(g) && g.getTiles().length === 3);
+	gr.sort((g1, g2) => g1.compare(g2))
+	if (gr.length < 3) { // pas assez de chii
+		return 0;
+	} else if(gr.length === 3) {
+		let t0 = gr[0].getTiles();
+		let t1 = gr[1].getTiles();
+		let t2 = gr[2].getTiles();
+		if (
+			t0[0].getValue() === t1[0].getValue() &&
+			t0[0].getValue() === t2[0].getValue() &&
+			t0[0].getFamily() !== t1[0].getFamily() &&
+			t0[0].getFamily() !== t2[0].getFamily() &&
+			t1[0].getFamily() !== t2[0].getFamily()
+		) {
+			return groups.length > 0 ? 1 : 2;
+		}
+		return 0;
+	} else {// il y a un intrus
+		for (let i = 0; i < 4; i++) {
+			let index = []
+			for (let j = 0; j < 4; j++) {
+				if (j !== i) {
+					index.push(j);
+				}
+			}
+			let t0 = gr[index[0]].getTiles();
+			let t1 = gr[index[1]].getTiles();
+			let t2 = gr[index[2]].getTiles();
+			if (
+				t0[0].getValue() === t1[0].getValue() &&
+				t0[0].getValue() === t2[0].getValue() &&
+				t0[0].getFamily() !== t1[0].getFamily() &&
+				t0[0].getFamily() !== t2[0].getFamily() &&
+				t1[0].getFamily() !== t2[0].getFamily()
+			) {
+				return groups.length > 0 ? 1 : 2;
+			}
+		}
+		return 0;
+	}
 },
 
+/**
+ * trois carrés
+ * 2/2
+ */
 sankantsu: function( //TODO
-	/**
-	 * trois carrés
-	 * 2/2
-	 */
 	hand: Hand,
 	groups: Array<Group>,
 	wind: number
@@ -678,11 +721,11 @@ sankantsu: function( //TODO
 	return 0;
 },
 
+/**
+ * quatre carrés
+ * 13/13
+ */
 suukantsu: function( //TODO
-	/**
-	 * quatre carrés
-	 * 13/13
-	 */
 	hand: Hand,
 	groups: Array<Group>,
 	wind: number
@@ -690,23 +733,49 @@ suukantsu: function( //TODO
 	return 0;
 },
 
-honitsu: function( //TODO
-	/**
-	 * semie pure
-	 * 2/3
-	 */
+/**
+ * semie pure
+ * 2/3
+ */
+honitsu: function(
 	hand: Hand,
 	groups: Array<Group>,
 	wind: number
 ): number {
+	let h = hand.toGroup();
+	let gr = [];
+	if (h !== undefined) {
+		gr = groups.concat(h);
+	} else {
+		gr = groups;
+	}
+	gr.sort((g1, g2) => g1.compare(g2))
+	if (gr.length === 0) {
+		return 0;
+	}
+	if (gr[gr.length - 1].getTiles()[0].getFamily() < 4) { // main pure
+		return 0;
+	}
+	let f = gr[0].getTiles()[0].getFamily();
+	if (f > 3) { // tout honneur
+		return 0;
+	}
+	if (gr.every(
+		g => {
+			let ff = g.getTiles()[0].getFamily();
+			return ff > 3 || f === ff
+		}
+	)) {
+		return groups.length > 0 ? 2 : 3;
+	}
 	return 0;
 },
 
+/**
+ * main pure
+ * 5/6
+ */
 chinitsu: function(
-	/**
-	 * main pure
-	 * 5/6
-	 */
 	hand: Hand,
 	groups: Array<Group>,
 	wind: number
@@ -722,11 +791,11 @@ chinitsu: function(
 	return 0;
 },
 
+/**	 
+ * main verte
+ * 13/13
+ */
 ryuuisou: function( //TODO
-	/**
-	 * main verte
-	 * 13/13
-	 */
 	hand: Hand,
 	groups: Array<Group>,
 	wind: number
@@ -737,11 +806,11 @@ ryuuisou: function( //TODO
 	return 0;
 },
 
+/**
+ * neuf portes
+ * 0/13
+ */
 chuurenPoutou: function( //TODO
-	/**
-	 * neuf portes
-	 * 0/13
-	 */
 	hand: Hand,
 	groups: Array<Group>,
 	wind: number

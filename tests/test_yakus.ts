@@ -23,7 +23,8 @@ let h15 = new Hand("m1m9m9 p1p9 s1s9 w1w2w3w4 d1d2d3");
 let h16 = new Hand("m1m1 m2m2 m3m3 m4m4 m5m5 m6m6 m7m7");
 let h17 = new Hand("m1m1 m2m2 m3m3 m4m4 m5m5 m6m6 m6m6");
 let h18 = new Hand("m1m2m3 m4m4m4 m7m7m7 p1p1p1 p5p5");
-let h19 = new Hand("m1m2m3 m7m7m7 p1p1p1 p5p5");
+let h19 = new Hand("m1m1m1 p1p1p1 s1s1s1 s1s2s3 p5p5");
+let h20 = new Hand("m1m1m1 p1p1p1 s1s1 s1s2s3 p5p5p5");
 
 // lipeikou
 count += assert(yakus.lipekou(h5, [], 0) === 1, "m123 m123 p789 p789 w33 is Lipeikou");
@@ -114,7 +115,7 @@ count += assert(yakus.tsuuiisou(h3, [], 0) === 0, "m111 p999 s111 w222 d11 is no
 total += 2;
 
 // kokushiMusou
-count += assert(yakus.kokushiMusou(h15, [], 0) === 13, "m1m9m9 p1p9 s1s9 w1w2w3w4 d1d2d3 is Kokushi Musou");
+count += assert(yakus.kokushiMusou(h15, [], 0) === 13, "m199 p19 s19 w1234 d123 is Kokushi Musou");
 count += assert(yakus.kokushiMusou(h3, [], 0) === 0, "m111 p999 s111 w222 d11 is not Kokushi Musou");
 total += 2;
 
@@ -140,6 +141,42 @@ count += assert(yakus.suuankou(h2, [], 0) === 13, "m111 m444 m777 p111 p55 is Sa
 count += assert(yakus.suuankou(h18, [], 0) === 0, "m123 m444 m777 p111 p55 is not  Sanankou");
 count += assert(yakus.suuankou(h7, [], 0) === 0, "m123 p123 s123 m789 p99 is not Sanankou");
 total += 3;
+
+// sanshoku doukou
+count += assert(yakus.sanshokuDoukou(h19, [], 0) === 2, "m111 p111 s111 s123 p55 is Shanshoku Doukou");
+count += assert(yakus.sanshokuDoukou(h20, [], 0) === 0, "m11 p111 s111 s123 p555 is not Shanshoku Doukou");
+count += assert(yakus.sanshokuDoukou(h7, [], 0) === 0, "m123 p123 s123 m789 p99 is not Shanshoku Doukou");
+total += 3;
+
+// sankantsu
+count += assert(false, "Sankantsu not implemented")
+total += 1;
+
+// suukantsu
+count += assert(false, "suukantsu not implemented");
+total += 1;
+
+// honitsu
+count += assert(yakus.honitsu(h9, [], 0) === 3, "m123 m123 d111 d222 d33 is Honitsu");
+count += assert(yakus.honitsu(h13, [], 0) === 0, "d11 w111 w222 w333 w444 is not Honitsu");
+count += assert(yakus.honitsu(h1, [], 0) === 0, "m123 m456 m789 m123 m55 is not Honitsu");
+count += assert(yakus.honitsu(h7, [], 0) === 0, "m123 p123 s123 m789 p99 is not Honitsu");
+total += 4;
+
+// chinitsu
+count += assert(yakus.chinitsu(h1, [], 0) === 6, "m123 m456 m789 m123 m55 is Chinitsu");
+count += assert(yakus.chinitsu(h9, [], 0) === 0, "m123 m123 d111 d222 d33 is not Chinitsu");
+count += assert(yakus.chinitsu(h13, [], 0) === 0, "d11 w111 w222 w333 w444 is not Chinitsu");
+count += assert(yakus.chinitsu(h7, [], 0) === 0, "m123 p123 s123 m789 p99 is not Chinitsu");
+total += 4;
+
+// ryuuisou
+count += assert(false, "Ryuuisou not implemented")
+total += 1;
+
+// chuuren poutou
+count += assert(false, "Chuuren Poutou not implemented")
+total += 1;
 
 // total
 console.log("Succès: " + count.toString() + "/" + total.toString());
