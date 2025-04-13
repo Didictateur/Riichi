@@ -265,7 +265,7 @@ function renderButton(
   ctx.font = "30px garamond";
   
   // Center text based on its length
-  const textXPosition = x + BUTTON_WIDTH * (0.5 - config.text.length * 0.025);
+  const textXPosition = x + BUTTON_WIDTH * (0.25 - config.text.length * 0.025);
   const textYPosition = y + BUTTON_HEIGHT/2 * 1.3;
   
   ctx.fillText(config.text, textXPosition, textYPosition);
