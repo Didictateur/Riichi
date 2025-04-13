@@ -210,7 +210,8 @@ export class Game {
   private advanceTurn(): void {
     this.updateWaitingTime();
     this.turn = (this.turn + 1) % GAME_CONSTANTS.PLAYERS;
-    this.hasPicked = false;
+		this.pick(this.turn);
+    this.hasPicked = true;
     this.hasPlayed = false;
   }
 
