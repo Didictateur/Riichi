@@ -7,7 +7,7 @@ export async function drawText(
 		.then(response => response.text());
 	const size = 30;
 	const dl = 5;
-	const ll = 50;
+	const ll = 20;
 	const xx = 10;
 	const defaultColor = "#ffffff";
 	ctx.fillStyle = defaultColor;

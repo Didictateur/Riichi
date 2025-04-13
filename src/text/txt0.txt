@@ -1,3 +1,5 @@
+~Introduction~
+
 Bienvenue sur ce site dédié au *Mahjong* !
 
 Ce site est principalement destiné aux personnes découvrant ce
@@ -9,7 +11,7 @@ même texte
 
 Cependant, de nombreux services y sont proposés:
 
-- *Introduction riichi majhong* dans l'onglet #ff00ff{Riichi Mahjong}
+- *Initiation riichi majhong* dans l'onglet #ff00ff{Riichi Mahjong}
 
 - *Explication d'une partie en physique* dans l'onglet #ff00ff{Partie
   réelle} pour comprendre comment y jouer dans la vraie vie

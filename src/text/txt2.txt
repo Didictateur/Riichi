@@ -1,10 +1,11 @@
+~Chapitre 2: La main~
+
 Durant une partie, un joueur possède dans sa main un total
 de *13 tuiles*.
 
 Lors de son tour, un joueur commence par *récupérer* une
 tuile supplémentaire, avant d'en *défausser* une (il peut
 s'agir de la même).
-
 
 
 

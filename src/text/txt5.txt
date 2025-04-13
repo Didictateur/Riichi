@@ -1,3 +1,5 @@
+~Chapitre 5: Annoncer la victoire~
+
 Nous avons appris jusque là que pour annoncer un *Chii*, il
 fallait nécessairement que cela se fasse via le joueur précédent.
 

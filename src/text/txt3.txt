@@ -1,3 +1,5 @@
+~Chapitre 3: Les groupes~
+
 Dans le but de gagner, un joueur doit réussir à créer une
 main avec une forme particulière. en effet, elle doit être
 constituée de:

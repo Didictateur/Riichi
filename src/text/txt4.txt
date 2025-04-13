@@ -1,3 +1,5 @@
+~Chapitre 4: Avoir une main valide en jeu~
+
 Voici votre *première partie* !
 Il est temps de mettre en oeuvre tout ce que vous avez appris.
 

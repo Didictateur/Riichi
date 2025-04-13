@@ -1,3 +1,5 @@
+~Chapitre 1: Présentation des tuiles~
+
 Le *Riichi Mahjong* est un jeu qui se joue avec des *tuiles*.
 Elles sont similaires aux cartes d'un jeu de Tarot dans la mesure
 où elles se divisent en deux catégories:
