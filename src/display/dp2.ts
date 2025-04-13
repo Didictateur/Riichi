@@ -31,7 +31,7 @@ class RiichiDisplay {
     private readonly Y: number = 150;
     private readonly OS: number = 75;
     private readonly SIZE: number = 0.75;
-    private readonly TILE_WIDTH: number = 80 * this.SIZE;
+    private readonly TILE_WIDTH: number = 78 * this.SIZE;
     private readonly MAX_TILES: number = 14;
     
     // Cache for mouse hit detection
@@ -78,7 +78,7 @@ class RiichiDisplay {
         this.tileRects = [];
         for (let i = 0; i < this.MAX_TILES; i++) {
             this.tileRects.push({
-                x: this.X + i * this.TILE_WIDTH,
+                x: this.X + i * this.TILE_WIDTH + (i === this.MAX_TILES - 1 ? 10 : 0),
                 y: 800,
                 width: 75,
                 height: 100 * this.SIZE
