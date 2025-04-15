@@ -10,6 +10,146 @@ const TILE_TYPES = {
   DRAGONS: { code: "d", family: 5 }
 };
 
+// Helper class for grouping operations
+class GroupFinder {
+  private tiles: Array<Tile>;
+  
+  constructor(tiles: Array<Tile>) {
+    // Create deep copies of the tiles to avoid modifying originals
+    this.tiles = tiles.map(t => new Tile(t.getFamily(), t.getValue(), t.isRed()));
+    this.sort();
+  }
+  
+  public sort(): void {
+    this.tiles.sort((a, b) => a.isLessThan(b) ? -1 : 1);
+  }
+  
+  public find(family: number, value: number): Tile | undefined {
+    const index = this.findTileIndex(family, value);
+    
+    if (index !== -1) {
+      [this.tiles[index], this.tiles[0]] = [this.tiles[0], this.tiles[index]];
+      const tile = this.tiles.shift();
+      this.sort();
+      return tile;
+    }
+    
+    return undefined;
+  }
+  
+  private findTileIndex(family: number, value: number): number {
+    return this.tiles.findIndex(
+      tile => tile.getFamily() === family && tile.getValue() === value
+    );
+  }
+  
+  public count(family: number, value: number): number {
+    return this.tiles.filter(
+      tile => tile.getFamily() === family && tile.getValue() === value
+    ).length;
+  }
+  
+  // Find groups recursively without modifying original tiles
+  public findGroups(pair: boolean = false): Array<Group> | undefined {
+    if (this.tiles.length === 0) {
+      return [];
+    }
+    
+    // Take last tile to try forming a group
+    const lastTile = this.tiles.pop() as Tile;
+    const family = lastTile.getFamily();
+    const value = lastTile.getValue();
+    
+    // Try to form a pair
+    if (this.count(family, value) >= 1 && !pair) {
+      const result = this.tryFormPair(lastTile);
+      if (result) return result;
+    }
+    
+    // Try to form a triplet (pon)
+    if (this.count(family, value) >= 2) {
+      const result = this.tryFormTriplet(lastTile, pair);
+      if (result) return result;
+    }
+    
+    // Try to form a sequence (chii)
+    if (family <= 3) { // Only suit tiles can form sequences
+      const hasMinusOne = this.count(family, value - 1) > 0;
+      const hasMinusTwo = this.count(family, value - 2) > 0;
+      
+      if (hasMinusOne && hasMinusTwo) {
+        const result = this.tryFormSequence(lastTile, pair);
+        if (result) return result;
+      }
+    }
+    
+    // If no valid group could be formed, put tile back and return undefined
+    this.tiles.push(lastTile);
+    this.sort();
+    return undefined;
+  }
+  
+  private tryFormPair(tile: Tile): Array<Group> | undefined {
+    const pairTile = this.find(tile.getFamily(), tile.getValue()) as Tile;
+    const groups = this.findGroups(true);
+    
+    // Put the tile back
+    this.tiles.push(pairTile);
+    this.sort();
+    
+    if (groups !== undefined) {
+      this.tiles.push(tile);
+      this.sort();
+      groups.push(new Group([tile, pairTile], 0, 0));
+      return groups;
+    }
+    
+    return undefined;
+  }
+  
+  private tryFormTriplet(tile: Tile, pair: boolean): Array<Group> | undefined {
+    const secondTile = this.find(tile.getFamily(), tile.getValue()) as Tile;
+    const thirdTile = this.find(tile.getFamily(), tile.getValue()) as Tile;
+    
+    const groups = this.findGroups(pair);
+    
+    // Put tiles back
+    this.tiles.push(secondTile);
+    this.tiles.push(thirdTile);
+    this.sort();
+    
+    if (groups !== undefined) {
+      groups.push(new Group([tile, secondTile, thirdTile], 0, 0));
+      this.tiles.push(tile);
+      this.sort();
+      return groups;
+    }
+    
+    return undefined;
+  }
+  
+  private tryFormSequence(tile: Tile, pair: boolean): Array<Group> | undefined {
+    const secondTile = this.find(tile.getFamily(), tile.getValue() - 1) as Tile;
+    const thirdTile = this.find(tile.getFamily(), tile.getValue() - 2) as Tile;
+    
+    const groups = this.findGroups(pair);
+    
+    // Put tiles back
+    this.tiles.push(secondTile);
+    this.tiles.push(thirdTile);
+    this.sort();
+    
+    if (groups !== undefined) {
+      groups.push(new Group([thirdTile, secondTile, tile], 0, 0));
+      this.tiles.push(tile);
+      this.sort();
+      return groups;
+    }
+    
+    return undefined;
+  }
+}
+
 export class Hand {
   private tiles: Array<Tile>;
   public isolate: boolean = false;
@@ -168,111 +308,12 @@ export class Hand {
 
   /**
    * Try to form hand into groups (for winning detection)
+   * This version preserves the original hand
    */
   public toGroup(pair: boolean = false): Array<Group> | undefined {
-    if (this.tiles.length === 0) {
-      return [];
-    }
-    
-    // Take last tile to try forming a group
-    const lastTile = this.tiles.pop() as Tile;
-    const family = lastTile.getFamily();
-    const value = lastTile.getValue();
-    
-    // Try to form a pair
-    if (this.count(family, value) >= 1 && !pair) {
-      const result = this.tryFormPair(lastTile);
-      if (result) return result;
-    }
-    
-    // Try to form a triplet (pon)
-    if (this.count(family, value) >= 2) {
-      const result = this.tryFormTriplet(lastTile, pair);
-      if (result) return result;
-    }
-    
-    // Try to form a sequence (chii)
-    const hasMinusOne = this.count(family, value - 1) > 0;
-    const hasMinusTwo = this.count(family, value - 2) > 0;
-    
-    if (hasMinusOne && hasMinusTwo) {
-      const result = this.tryFormSequence(lastTile, pair);
-      if (result) return result;
-    }
-    
-    // If no valid group could be formed, put tile back and return undefined
-    this.tiles.push(lastTile);
-    this.sort();
-    return undefined;
-  }
-
-  /**
-   * Try to form a pair with the given tile
-   */
-  private tryFormPair(tile: Tile): Array<Group> | undefined {
-    const pairTile = this.find(tile.getFamily(), tile.getValue()) as Tile;
-    const groups = this.toGroup(true);
-    
-    // Put the tile back
-    this.tiles.push(pairTile);
-    this.sort();
-    
-    if (groups !== undefined) {
-      this.tiles.push(tile);
-      this.sort();
-      groups.push(new Group([tile, pairTile], 0, 0));
-      return groups;
-    }
-    
-    return undefined;
-  }
-
-  /**
-   * Try to form a triplet (pon) with the given tile
-   */
-  private tryFormTriplet(tile: Tile, pair: boolean): Array<Group> | undefined {
-    const secondTile = this.find(tile.getFamily(), tile.getValue()) as Tile;
-    const thirdTile = this.find(tile.getFamily(), tile.getValue()) as Tile;
-    
-    const groups = this.toGroup(pair);
-    
-    // Put tiles back
-    this.tiles.push(secondTile);
-    this.tiles.push(thirdTile);
-    this.sort();
-    
-    if (groups !== undefined) {
-      groups.push(new Group([tile, secondTile, thirdTile], 0, 0));
-      this.tiles.push(tile);
-      this.sort();
-      return groups;
-    }
-    
-    return undefined;
-  }
-
-  /**
-   * Try to form a sequence (chii) with the given tile
-   */
-  private tryFormSequence(tile: Tile, pair: boolean): Array<Group> | undefined {
-    const secondTile = this.find(tile.getFamily(), tile.getValue() - 1) as Tile;
-    const thirdTile = this.find(tile.getFamily(), tile.getValue() - 2) as Tile;
-    
-    const groups = this.toGroup(pair);
-    
-    // Put tiles back
-    this.tiles.push(secondTile);
-    this.tiles.push(thirdTile);
-    this.sort();
-    
-    if (groups !== undefined) {
-      groups.push(new Group([thirdTile, secondTile, tile], 0, 0));
-      this.tiles.push(tile);
-      this.sort();
-      return groups;
-    }
-    
-    return undefined;
+    // Create a helper instance with copied tiles
+    const groupFinder = new GroupFinder(this.tiles);
+    return groupFinder.findGroups(pair);
   }
   
   /**

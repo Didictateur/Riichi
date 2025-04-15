@@ -97,7 +97,7 @@ export class Game {
     
     this.lastDiscard = undefined;
     this.hands[0].sort();
-    this.pick(0);
+    if (this.turn === 0) this.pick(0);
   }
 
   public draw(mp: MousePos): void {
@@ -497,7 +497,7 @@ export class Game {
   }
 
   private drawGame(): void {
-    // Update game state
+		// Update game state
     this.play();
     
     // Draw game elements
