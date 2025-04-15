@@ -37,6 +37,7 @@ export class Game {
   // Game state
   private level: number;
   private turn = 0;
+	private windPlayer: number;
   private waitingTime = GAME_CONSTANTS.WAITING_TIME.DEFAULT;
   private selectedTile: number | undefined = undefined;
   private canCall: boolean = false;
@@ -63,13 +64,16 @@ export class Game {
     staticCtx: CanvasRenderingContext2D,
     staticCv: HTMLCanvasElement,
     red: boolean = false,
-    level: number = 0
+    level: number = 0,
+		windPlayer: number = 0
   ) {
     this.ctx = ctx;
     this.cv = cv;
     this.staticCtx = staticCtx;
     this.staticCv = staticCv;
     this.level = level;
+		this.windPlayer = windPlayer;
+		this.turn = windPlayer % 2 === 0 ? windPlayer : 4 - windPlayer;
     
     // Initialize game elements
     this.deck = new Deck(red);
@@ -497,7 +501,7 @@ export class Game {
     this.play();
     
     // Draw game elements
-    drawState(this.staticCtx, this.turn);
+    drawState(this.staticCtx, this.turn, GAME_CONSTANTS.PI / 2 * this.windPlayer);
     this.drawDiscardSize();
     this.drawResult();
     this.drawHands();

@@ -1,0 +1,28 @@
+~Chapitre 6: Le vent du joueur~
+
+Normalement, vous auriez dû remarquer la présence de directions
+cardinales affichées au centre. L'explication est simple: chaque
+joueur se voit assigner un vent durant une manche. L'assignation
+se fait simplement: un premier joueur est l'#ff00ff{Est}, le joueur
+à sa droite est donc le #ff00ff{Sud}, en face l'#ff00ff{Ouest} et à sa
+gauche le #ff00ff{Nord}
+
+L'#ff00ff{Est} est celui qui joue en tout premier durant sa manche.
+À la fin de cette dernière, les vents tournent dans le sens
+anti-horaire
+
+La partie s'arrête lorsque *tous* les joueurs ont été *Est*
+
+
+#ff0000{Remarque}: Contrairement à une boussole, l'*Est* et
+l'*Ouest* sont inversés. La logique qui se cache derrière est
+qu'il faut interpréter le jeu comme une carte céleste
+
+#ff0000{Remarque 2}: Si le joueur *Est* gagne la manche, il y a alors
+une #ff00f{répétition}, et les vents ne tournent pas
+
+
+
+
+~Dans le jeu ci-contre, le vent est tiré aléatoirement, et change
+à chaque manche en fonction du résultat~
