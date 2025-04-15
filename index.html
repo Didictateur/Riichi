@@ -141,33 +141,41 @@
 
 					document.body.appendChild(currentScript);
 				}
+				
+				let lastLoadedScript = 'dp0.js';
+				let lastTextMode = true;
 
-        function loadScript(scriptName, txt = true) {
-					if (window.cleanup) {
-						window.cleanup();
-					}
+				function loadScript(scriptName, txt = true) {
+    				if (window.cleanup) {
+        		window.cleanup();
+    				}
 
-					const container = document.getElementById("canvasContainer");
-					container.innerHTML = `<canvas id="myCanvas" width="1000" height="1000"></canvas>`;
+    				const container = document.getElementById("canvasContainer");
+    				container.innerHTML = `<canvas id="myCanvas" width="1000" height="1000"></canvas>`;
 
-					const timestamp = new Date().getTime();
+    				const timestamp = new Date().getTime();
 
-					currentScript = document.createElement("script");
-					currentScript.type = "module";
-					currentScript.src = `build/${scriptName}?t=${timestamp}`;
+    				currentScript = document.createElement("script");
+    				currentScript.type = "module";
+    				currentScript.src = `build/${scriptName}?t=${timestamp}`;
 
-					document.body.appendChild(currentScript);
+    				document.body.appendChild(currentScript);
+    
+    				lastLoadedScript = scriptName;
+    				lastTextMode = txt;
 
-					if (txt) {
-						const number = scriptName.substring(2, scriptName.length - 3);
-						loadText("txt" + number + ".js");
-					}
+    				if (txt) {
+        				const number = scriptName.substring(2, scriptName.length - 3);
+        				loadText("txt" + number + ".js");
+    				}
 				}
-					
-				//tests
-				loadScript('test.js', false);
 
-				//script initial
+				document.addEventListener('keydown', function(event) {
+    				if (event.keyCode === 13 || event.key === 'Enter') {
+        				loadScript(lastLoadedScript, lastTextMode);
+    				}
+				});
+
 				loadScript('dp0.js');
     </script>
 </body>
