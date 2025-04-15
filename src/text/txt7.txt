@@ -1,0 +1,23 @@
+~Chapitre 7: Les yakus~
+
+Il est maintenant temps de révéler la vérité. Depuis le début,
+bous êtes dans le mensonge. En effet, une main *Valide* (avec
+tout ses groupes) n'est pas suffisant pour gagner: la main doit
+également respecter une #ff00ff{condition de victoire}.
+
+Ces conditions sont appelées des #ff00ff{Yakus}, et il y en a
+un total de *39*. Mais pas de panique ! En général, une dizaine
+d'entre eux est largment suffisant pour la pllupart des parties.
+
+Sur la gauche, sont présentés les Yakus les plus courant:
+- #ff00ff{Tout ordinaire}: Aucun honneur, aucun terminal
+- #ff00ff{Brelan de valeur}:
+    - Brelan de dragon
+		- Brelan d'Est
+		- Brelan du vent du joueur
+- #ff00ff{Main pure}: une seule famille
+- #ff00ff{Main semi-pure}: une seule famille en plus d'honneurs
+- #ff00ff{Double suite}: deux suites identiques
+    #ff0000{Ne fonctionne qu'en main fermée !}
+- #ff00ff{Sept paire}: sept pairs distinctes
+    #ff0000{L'une des deux exceptions sur la forme des groupes}
