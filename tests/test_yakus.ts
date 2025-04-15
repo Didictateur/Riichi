@@ -1,6 +1,8 @@
 import { assert } from "./assert"
 import { yakus } from "../src/yakus/yaku"
 import { Hand } from "../src/hand"
+import { Group } from "../src/group";
+import { Tile } from "../src/tile";
 
 let count = 0;
 let total = 0;
@@ -25,6 +27,10 @@ let h17 = new Hand("m1m1 m2m2 m3m3 m4m4 m5m5 m6m6 m6m6");
 let h18 = new Hand("m1m2m3 m4m4m4 m7m7m7 p1p1p1 p5p5");
 let h19 = new Hand("m1m1m1 p1p1p1 s1s1s1 s1s2s3 p5p5");
 let h20 = new Hand("m1m1m1 p1p1p1 s1s1 s1s2s3 p5p5p5");
+let h21 = new Hand("m1m1m1 m2m3m4 m5m6m7 m8m8 m9m9m9");
+let h22 = new Hand("s2s2s2 s8s8s8 s4s4s4 s6s6 d2d2d2");
+let h23 = new Hand("m1m1m1 m2m3m4 m5m6m7 m8m8m8 m9m9m9");
+let h24 = new Hand("m1m1m1 m2m3m4 m6m6 m5m6m7 m9m9m9");
 
 // lipeikou
 count += assert(yakus.lipekou(h5, [], 0) === 1, "m123 m123 p789 p789 w33 is Lipeikou");
@@ -149,7 +155,18 @@ count += assert(yakus.sanshokuDoukou(h7, [], 0) === 0, "m123 p123 s123 m789 p99 
 total += 3;
 
 // sankantsu
-count += assert(false, "Sankantsu not implemented")
+// count += assert(
+//	yakus.sankantsu(
+//		new Hand(),
+//		[
+//			new Group([new Tile(1, 1, false), new Tile(1, 1, false), new Tile(1, 1, false), new Tile(1, 1, false)], 0, 0),
+//			new Group([new Tile(1, 3, false), new Tile(1, 3, false), new Tile(1, 3, false), new Tile(1, 3, false)], 0, 0),
+//			new Group([new Tile(1, 5, false), new Tile(1, 5, false), new Tile(1, 5, false), new Tile(1, 5, false)], 0, 0),
+//		],
+//		0
+//	) === 2,
+//	" is Sankantsu");
+count += assert(false, "sankantsu not implemented");
 total += 1;
 
 // suukantsu
@@ -171,12 +188,16 @@ count += assert(yakus.chinitsu(h7, [], 0) === 0, "m123 p123 s123 m789 p99 is not
 total += 4;
 
 // ryuuisou
-count += assert(false, "Ryuuisou not implemented")
-total += 1;
+count += assert(yakus.ryuuisou(h22, [], 0) === 13, "s222 s888 s444 s66 d222 is Ryuuisou");
+count += assert(yakus.ryuuisou(h1, [], 0) === 0, "m123 m456 m789 m123 m55 is not Ryuuisou");
+total += 2;
 
 // chuuren poutou
-count += assert(false, "Chuuren Poutou not implemented")
-total += 1;
+count += assert(yakus.chuurenPoutou(h21, [], 0) === 13, "m111 m234 m567 m88 m999 is Chuuren Poutou");
+count += assert(yakus.chuurenPoutou(h23, [], 0) === 0, "m111 m234 m567 m888 m999 is not Chuuren Poutou");
+count += assert(yakus.chuurenPoutou(h24, [], 0) === 0, "m111 m234 m66 m567 m999 is not Chuuren Poutou");
+count += assert(yakus.chuurenPoutou(h1, [], 0) === 0, "m123 m456 m789 m123 m55 is not Chuuren Poutou");
+total += 4;
 
 // total
 console.log("Succès: " + count.toString() + "/" + total.toString());

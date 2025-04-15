@@ -1,5 +1,6 @@
 import { Hand } from "../hand";
 import { Group } from "../group";
+import { Tile } from "../tile"
 
 function ord(g: Group): boolean {
 	return g.getTiles().every(
@@ -33,6 +34,20 @@ function chii(g: Group): boolean {
 function pon(g: Group): boolean {
 	let t = g.getTiles();
 	return t[0].getValue() === t[1].getValue();
+}
+
+function green(t: Tile): boolean {
+	let f = t.getFamily();
+	let v = t.getValue();
+	if (f !== 5 && f !== 3) {
+		return false;
+	}
+
+	if (f === 5) {
+		return v === 2;
+	}
+
+	return v % 2 === 0 || v === 3;
 }
 
 
@@ -795,13 +810,21 @@ chinitsu: function(
  * main verte
  * 13/13
  */
-ryuuisou: function( //TODO
+ryuuisou: function(
 	hand: Hand,
 	groups: Array<Group>,
 	wind: number
 ): number {
-	if (yakus.chinitsu(hand, groups, wind) === 0) {
+	if (groups.length > 0) {
 		return 0;
+	}
+	let h = hand.toGroup();
+	if (h?.every(
+		g => g.getTiles().every(
+			t => green(t)
+		)
+	)) {
+		return 13;
 	}
 	return 0;
 },
@@ -810,13 +833,55 @@ ryuuisou: function( //TODO
  * neuf portes
  * 0/13
  */
-chuurenPoutou: function( //TODO
+chuurenPoutou: function(
 	hand: Hand,
 	groups: Array<Group>,
 	wind: number
 ): number {
 	if (groups.length > 0 || yakus.chinitsu(hand, groups, wind) === 0) {
 		return 0;
+	}
+	let tiles = hand.getTiles();
+	if (tiles[0].getFamily() >= 4) {
+		return 0;
+	}
+
+	let pureHand = [tiles[0].getValue()];
+	let count = 1;
+	for (let i = 1; i < tiles.length; i++) {
+		let v = tiles[i].getValue();
+		let lastv = pureHand[pureHand.length - 1];
+		
+		if (v === 1 || v === 9) {
+			if (v === lastv) {
+				count++;
+				if (count < 4) {
+					pureHand.push(v);
+				} else if (count > 4) {
+					return 0;
+				}
+			} else {
+				count = 1;
+				pureHand.push(v);
+			}
+		
+		} else {
+			if (v === lastv) {
+				count ++;
+				if (count < 2) {
+					pureHand.push(v);
+				} else if (count > 2) {
+					return 0;
+				}
+			} else {
+				count = 1;
+				pureHand.push(v);
+			}
+		}
+	}
+
+	if (pureHand.toString() === [1, 1, 1, 2, 3, 4, 5, 6, 7, 8, 9, 9, 9].toString()) {
+		return 13;
 	}
 	return 0;
 }
