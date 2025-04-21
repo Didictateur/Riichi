@@ -6,13 +6,13 @@ où elles se divisent en deux catégories:
 
 - Les #ff00ff{familles}
    Nous pouvons retrouver dans ce jeu *3* familles distinctes:
-   - Les *Man*, appelées les #ff00ff{Caractères}
-   - Les *Pin*, appelées les #ff00ff{Ronds}
-   - Les *Sou*, appelées les #ff00ff{Bambous}
-   Comme dans un jeu de cartes, ils sont tous numérotées
+   - Les #ff00ff{Caractères}, appelées les *Man* en japonais
+   - Les #ff00ff{Ronds}, appelées les *Pin* en japonais
+   - Les #ff00ff{Bambous}, appelées les *Sou* en japonais
+   Comme dans un jeu de cartes, elles sont toutes numérotées
    de *1* jusqu'à *9*.
 
 - Les #ff00ff{honneurs}
    Ils sont séparés selon *2* catégories:
-   - Les *Dragons*: #ff0000{Rouge}, #ffffff{Blanc} et #00ff00{Vert}
-   - Les *Vents*: #0000e0{Est}, #0000e0{Sud}, #0000e0{Ouest} et #0000e0{Nord}
+   - Les *Dragons*: #ff0000{Rouge}, *Blanc* et #00ff00{Vert}
+   - Les *Vents*: #a0a0ff{Est}, #a0a0ff{Sud}, #a0a0ff{Ouest} et #a0a0ff{Nord}

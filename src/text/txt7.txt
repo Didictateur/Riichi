@@ -1,15 +1,15 @@
 ~Chapitre 7: Les yakus~
 
 Il est maintenant temps de révéler la vérité. Depuis le début,
-bous êtes dans le mensonge. En effet, une main *Valide* (avec
-tout ses groupes) n'est pas suffisant pour gagner: la main doit
+vous êtes dans le mensonge. En effet, une main *Valide* (avec
+tout ses groupes) n'est pas suffisante pour gagner: la main doit
 également respecter une #ff00ff{condition de victoire}.
 
 Ces conditions sont appelées des #ff00ff{Yakus}, et il y en a
 un total de *39*. Mais pas de panique ! En général, une dizaine
-d'entre eux est largment suffisant pour la pllupart des parties.
+d'entre eux est largment suffisant pour la plupart des parties.
 
-Sur la gauche, sont présentés les Yakus les plus courant:
+Sur la gauche, sont présentés les Yakus les plus courants:
 - #ff00ff{Tout ordinaire}: Aucun honneur, aucun terminal
 - #ff00ff{Brelan de valeur}:
     - Brelan de dragon

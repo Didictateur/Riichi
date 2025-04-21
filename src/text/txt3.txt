@@ -13,8 +13,7 @@ Nous y distinguons:
 - Les #ff00ff{Chii}, correspondant aux *Suites*
 - Les #ff00ff{Pon}, correspondant aux *Brelans*
 
-Ainsi, pour gagner, un joueur doit posseder *3 x 4 + 2* tuiles,
-soit *14* tuiles au total.
+Ainsi, pour gagner, un joueur doit posseder *14* tuiles au total.
 De ce fait, il n'est possible de gagner uniquement lorsqu'une
 tuile est récupérée
 
