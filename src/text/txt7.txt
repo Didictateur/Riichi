@@ -13,8 +13,8 @@ Sur la gauche, sont présentés les Yakus les plus courants:
 - #ff00ff{Tout ordinaire}: Aucun honneur, aucun terminal
 - #ff00ff{Brelan de valeur}:
     - Brelan de dragon
-		- Brelan d'Est
-		- Brelan du vent du joueur
+    - Brelan d'Est
+    - Brelan du vent du joueur
 - #ff00ff{Main pure}: une seule famille
 - #ff00ff{Main semi-pure}: une seule famille en plus d'honneurs
 - #ff00ff{Double suite}: deux suites identiques

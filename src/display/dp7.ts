@@ -16,6 +16,8 @@ class RiichiDisplay {
   
   // Ressources du jeu
   private hands: Array<Hand> = [];
+	private handTexts: Array<string> = [];
+	private wind: number = Math.floor(Math.random() * 4);
   
   // Animation et événements
   private animationFrameId: number | null = null;
@@ -25,7 +27,7 @@ class RiichiDisplay {
   // Constantes pour le rendu
   private readonly BASE_X: number = 50;
   private readonly BASE_Y: number = 90;
-	private readonly DY = 180;
+	private readonly DY = 160;
   private readonly SIZE: number = 0.75;
   
   constructor(canvasId: string = CANVAS_ID) {
@@ -60,6 +62,11 @@ class RiichiDisplay {
    */
   private drawHandsAndLabels(): void {
 		for (let i = 0; i < this.hands.length; i++) {
+
+			this.ctx.fillStyle = "#DFDFFF";
+			this.ctx.font = "40px serif";
+			this.ctx.fillText(this.handTexts[i], this.BASE_X, this.BASE_Y - 20 + i * this.DY);
+
     	this.hands[i].drawHand(
 				this.ctx,
 				this.BASE_X,
@@ -102,9 +109,22 @@ class RiichiDisplay {
       // Création des mains prédéfinies
       this.hands.push(
 				function_generator.ordinaires(),
+				function_generator.brelan_valeur(this.wind),
+				function_generator.main_pure(),
+				function_generator.main_semi_pure(),
+				function_generator.double_suite(),
 				function_generator.sept_pairs()
       );
-      
+
+			this.handTexts.push(
+				"Tout ordinaires :",
+				"Brelan de valeur (" + ["Est", "Sud", "Ouest", "Nord"][this.wind] + ") :",
+				"Main pure :",
+				"Main semi-pure :",
+				"Double suite :",
+				"Sept pairs :"
+			);
+
       // Préchargement parallèle des ressources
       await Promise.all([
         ...this.hands.map(hand => this.preloadHand(hand))
