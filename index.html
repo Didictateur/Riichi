@@ -94,25 +94,25 @@
 				<ul class="menu-item">
 					<a href="#">Partie réelle</a>
 					<div class="dropdown">
-						<a href="#" onclick="loadScript('')">Chap 1: Placement des joueurs</a>
-						<a href="#" onclick="loadScript('')">Chap 2: Construction des murs</a>
-						<a href="#" onclick="loadScript('')">Chap 3: Désigner la pioche</a>
-						<a href="#" onclick="loadScript('')">Chap 4: Le mur mort</a>
+						<a href="#" onclick="loadScript('dp16.js')">Chap 1: Placement des joueurs</a>
+						<a href="#" onclick="loadScript('dp17.js')">Chap 2: Construction des murs</a>
+						<a href="#" onclick="loadScript('dp18.js')">Chap 3: Désigner la pioche</a>
+						<a href="#" onclick="loadScript('dp19.js')">Chap 4: Le mur mort</a>
 				</ul>
 				<ul class="menu-item">
-					<a href="#" onclick="loadScript('')">Riichi à trois</a>
+					<a href="#" onclick="loadScript('dp20.js')">Riichi à trois</a>
 				</ul>
 				<ul class="menu-item">
 					<a href="#">Yaku trainer</a>
 					<div class="dropdown">
-						<a href="#" onclick="loadScript('')">Yaku 1</a>
+						<a href="#" onclick="loadScript('dp21.js')">Yaku 1</a>
 					</div>
 				</ul>
 				<ul class="menu-item">
 					<a href="#">MCR</a>
 					<div class="dropdown">
-						<a href="#" onclick="loadScript('')">Chap 1:</a>
-						<a href="#" onclick="loadScript('')">Chap 2:</a>
+						<a href="#" onclick="loadScript('dp22.js')">Chap 1:</a>
+						<a href="#" onclick="loadScript('dp23.js')">Chap 2:</a>
 					</div>
 				</ul>
     </nav>
@@ -125,10 +125,11 @@
     <script>
 				let currentScript = null;
 				
-				function loadText(scriptName) {
+				function loadText(scriptName, nb) {
 					if (window.cleanup) {
 						window.cleanup();
 					}
+					window.txtNumber = nb;
 
 					const container = document.getElementById("anotherCanvasContainer");
 					container.innerHTML = `<canvas id="myTextCanvas" width="1000" height="1000"></canvas>`;
@@ -166,7 +167,7 @@
 
     				if (txt) {
         				const number = scriptName.substring(2, scriptName.length - 3);
-        				loadText("txt" + number + ".js");
+        				loadText("txt.js", number);
     				}
 				}
 
