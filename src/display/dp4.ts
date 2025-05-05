@@ -2,6 +2,28 @@ import { Deck } from "../deck";
 import { Hand } from "../hand";
 import { Game } from "../game";
 
+function showPlayButton() {
+	const button = document.createElement('button');
+	button.id = 'playButton';
+	button.textContent = 'Jouer';
+	button.style.position = 'absolute';
+	button.style.left = `${1050/2}px`;
+	button.style.top = `${1050/2}px`;
+	button.style.transform = 'translate(-50%, -50%)';
+	button.style.fontSize = '2rem';
+	button.style.padding = '1em 2em';
+	button.style.zIndex = '1000';
+
+	document.body.appendChild(button);
+
+	button.addEventListener('click', async () => {
+		button.disabled = true;
+		button.textContent = 'Chargement...';
+		await initDisplay();
+		button.remove();
+	});
+}
+
 class RiichiGameManager {
   // Configuration globale
   private readonly CANVAS_ID: string = "myCanvas";
@@ -249,5 +271,5 @@ declare global {
 
 // Initialisation automatique si le script est chargé directement
 if (typeof window !== 'undefined') {
-  initDisplay().catch(console.error);
+	showPlayButton();
 }

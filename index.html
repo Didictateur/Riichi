@@ -20,6 +20,7 @@
         .menu-item {
             position: relative;
             list-style: none;
+						z-index: 9999;
         }
         .menu-item > a {
             color: white;
@@ -124,11 +125,17 @@
 
     <script>
 				let currentScript = null;
+
+				function removePlayButton() {
+					const btn = document.getElementById("playButton");
+					if (btn) btn.remove();
+				}
 				
 				function loadText(scriptName, nb) {
 					if (window.cleanup) {
 						window.cleanup();
 					}
+					removePlayButton();
 					window.txtNumber = nb;
 
 					const container = document.getElementById("anotherCanvasContainer");
@@ -150,6 +157,7 @@
     				if (window.cleanup) {
         		window.cleanup();
     				}
+						removePlayButton();
 
     				const container = document.getElementById("canvasContainer");
     				container.innerHTML = `<canvas id="myCanvas" width="1000" height="1000"></canvas>`;
