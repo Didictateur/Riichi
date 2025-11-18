@@ -1,23 +1,23 @@
+
 ~Chapitre 7: Les yakus~
 
-Il est maintenant temps de révéler la vérité. Depuis le début,
-vous êtes dans le mensonge. En effet, une main *Valide* (avec
-tout ses groupes) n'est pas suffisante pour gagner: la main doit
-également respecter une #ff00ff{condition de victoire}.
+Une main *Valide* (forme correcte) n'est pas suffisante pour gagner :
+il faut aussi que la main remplisse au moins une condition de
+victoire, appelée un #ff00ff{Yaku}.
 
-Ces conditions sont appelées des #ff00ff{Yakus}, et il y en a
-un total de *39*. Mais pas de panique ! En général, une dizaine
-d'entre eux est largment suffisant pour la plupart des parties.
+Il existe de nombreux Yakus (environ *39*), mais en pratique une
+dizaine des plus courants suffit pour la majorité des parties.
 
-Sur la gauche, sont présentés les Yakus les plus courants:
-- #ff00ff{Tout ordinaire}: Aucun honneur, aucun terminal
-- #ff00ff{Brelan de valeur}:
-    - Brelan de dragon
-    - Brelan d'Est
-    - Brelan du vent du joueur
-- #ff00ff{Main pure}: une seule famille
-- #ff00ff{Main semi-pure}: une seule famille en plus d'honneurs
-- #ff00ff{Double suite}: deux suites identiques
+Exemples de Yakus fréquents :
+- #ff00ff{Tout ordinaire} : aucune tuile terminale ni honneur
+- #ff00ff{Brelan de valeur} : par exemple brelan de dragon, brelan
+    d'Est ou brelan du vent du joueur
+- #ff00ff{Main pure} : une seule famille
+- #ff00ff{Main semi‑pure} : une seule famille + des honneurs
+- #ff00ff{Double suite} : deux suites identiques
     #ff0000{Ne fonctionne qu'en main fermée !}
-- #ff00ff{Sept paire}: sept pairs distinctes
-    #ff0000{L'une des deux exceptions sur la forme des groupes}
+- #ff00ff{Sept paires} : sept paires distinctes
+    #ff0000{Exception sur la forme des groupes}
+
+(Liste non exhaustive — référez‑vous à la fiche Yaku pour les règles
+détaillées.)

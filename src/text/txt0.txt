@@ -1,27 +1,27 @@
+
 ~Introduction~
 
 Bienvenue sur ce site dédié au *Riichi Mahjong* !
 
-Ce site s'adresse principalement aux personnes découvrant ce
+Ce site s'adresse principalement aux personnes qui découvrent ce
 formidable jeu.
 
-Le nombre de chapitres par section peut sembler impressionnant
-au premier abord, mais chacun d'eux reste court et facilement
-abordable.
+Le nombre de chapitres par section peut sembler important
+au premier abord, mais chacun d'eux reste court et facile
+à aborder.
 
-Vous trouverez notamment :
+Vous y trouverez notamment :
 
-- *Initiation au Riichi Mahjong* dans l'onglet #ff00ff{Riichi Mahjong}.
+- *Initiation au Riichi Mahjong* (onglet #ff00ff{Riichi Mahjong})
 
-- *Explication d'une partie réelle* dans l'onglet #ff00ff{Partie réelle}
+- *Explication d'une partie réelle* (onglet #ff00ff{Partie réelle})
   pour apprendre à jouer en conditions réelles.
 
-- *Présentation d'une variante* dans l'onglet #ff00ff{Riichi à trois}.
+- *Présentation d'une variante* (onglet #ff00ff{Riichi à trois})
 
-- *Entraînement aux différents Yakus* dans l'onglet #ff00ff{Yaku trainer}.
+- *Entraînement aux différents Yakus* (onglet #ff00ff{Yaku trainer})
 
-- *Introduction au MCR* (variante chinoise) dans l'onglet #ff00ff{MCR}.
+- *Introduction au MCR* (variante chinoise) (onglet #ff00ff{MCR})
 
-Ce site est en développement — il contient encore des pages incomplètes
-et des améliorations à apporter. N'hésitez pas à poster vos retours
-sur le dépôt GitHub pour contribuer à son amélioration.
+Ce site est en développement — certaines pages sont encore incomplètes.
+N'hésitez pas à poster vos retours sur le dépôt GitHub pour contribuer.

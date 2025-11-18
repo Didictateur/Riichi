@@ -1,25 +1,25 @@
 ~Chapitre 3: Les groupes~
 
-Dans le but de gagner, un joueur doit réussir à créer une
-main avec une forme particulière. en effet, elle doit être
-constituée de:
+Pour gagner, un joueur doit former une main suivant une forme
+particulière. En effet, une main standard est composée de :
 
-- *4 groupes distincts* constituées de *3 tuiles*
+- *4 groupes* de *3 tuiles* (chaque groupe peut être une suite ou
+	un brelan)
 - *1 paire*
 
-~Ci-contre des exemples de groupes valides et non valides~
+~Ci‑contre : exemples de groupes valides et non valides~
 
-Nous y distinguons:
-- Les #ff00ff{Chii}, correspondant aux *Suites*
-- Les #ff00ff{Pon}, correspondant aux *Brelans*
+On distingue notamment :
+- Les #ff00ff{Chii} : suites de trois tuiles consécutives (même
+	famille)
+- Les #ff00ff{Pon} : brelans (trois tuiles identiques)
 
-Ainsi, pour gagner, un joueur doit posseder *14* tuiles au total.
-De ce fait, il n'est possible de gagner uniquement lorsqu'une
-tuile est récupérée
+Ainsi, lorsqu'un joueur gagne, sa main contient *14 tuiles* au total.
+Il est donc possible d'annoncer la victoire uniquement après avoir
+récupéré une tuile (pioche ou défausse).
 
-Lorsque tous ces groupes sont présents, nous dirons que la
-main est #ff00ff{Valide}
+Lorsque tous ces éléments sont réunis, la main est considérée
+#ff00ff{Valide}.
 
-~De même, il est possible de s'entraîner cette fois à piocher
-et défausser des tuiles jusqu'à l'obtention d'une main valide
-PS: un message le fera savoir à ce moment là~
+~Pour s'entraîner, piochez et défaussez des tuiles jusqu'à obtenir
+une main valide — un message vous indiquera le succès.~

@@ -1,13 +1,11 @@
 ~Chapitre 2: La main~
 
-Durant une partie, un joueur possède dans sa main un total
-de *13 tuiles*.
+Durant une partie, un joueur possède généralement *13 tuiles*
+dans sa main.
 
-Lors de son tour, un joueur commence par *récupérer* une
-tuile supplémentaire, avant d'en *défausser* une (il peut
-s'agir de la même).
-
-
+Lors de son tour, il commence par *piocher* (récupérer) une tuile,
+puis il *défausse* une tuile (qui peut être celle qu'il vient de
+piocher).
 
 
 
@@ -20,5 +18,7 @@ s'agir de la même).
 
 
 
-~Une main interactive est mise à disposition pour s'entrainer
+
+
+~Une main interactive est mise à disposition pour s'entraîner
 à cette mécanique~

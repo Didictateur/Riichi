@@ -1,29 +1,24 @@
 ~Chapitre 5: Annoncer la victoire~
 
-Nous avons appris jusque là que pour annoncer un *Chii*, il
-fallait nécessairement que cela se fasse via le joueur précédent.
+Nous avons vu qu'un *Chii* ne peut être déclaré que sur la défausse
+du joueur précédent (sauf exception).
 
-Il existe cependant une exception: *s'il ne nous manque plus
-qu'une seule tuile*. Dans ce cas précis, nous disons que le
-joueur est en #ff00ff{Tenpai} (il n'est pas obligé de retenir ce terme pour
-jouer). À ce moment là, #ff0000{qui que ce soit} qui défausse une tuile,
-un joueur en *Tenpai* peut la récupérer directement si elle lui
-donne la victoire
+Une exception importante : lorsqu'il ne manque plus qu'une seule tuile
+pour compléter la main, on dit que le joueur est en #ff00ff{Tenpai}.
+Dans cet état, si quelqu'un défausse une tuile qui complète la main
+du joueur en Tenpai, ce dernier peut la récupérer et annoncer la
+victoire.
 
-Il y a alors deux situations possibles:
-- Le joueur en *Tenpai* pioche une tuile qui le fait gagner. Il
-l'annonce alors  avec #ff00ff{Tsumo !}
-- Le joueur en *Tenpai* gagne sur la défausse d'un autre joueur.
-Il l'annonce alors avec #ff00ff{Ron !}
+Il existe deux façons de gagner :
+- Si le joueur en *Tenpai* pioche la tuile gagnante lui‑même, il
+  annonce #ff00ff{Tsumo !}
+- Si le joueur en *Tenpai* gagne sur la défausse d'un autre joueur,
+  il annonce #ff00ff{Ron !}
 
-Par la suite, un nouveau bouton apparaitra pour permettre au
-joueur d'annoncer sa victoire. Le plus important à retenir,
-c'est que *Pon* et *Tsumo* signifie la victoire
+Après une victoire, des commandes apparaîtront pour signaler la
+victoire. Les appels de victoire sont #ff00ff{Ron} et
+#ff00ff{Tsumo} — ce sont eux qui déclarent la fin de la main.
 
-
-
-
-
-~Dans l'exemple ci-contre, le joueur peut annoncer sa victoire
-avec *Ron* sur la défausse du joueur d'en face en complétant
-un *Chii*~
+~Dans l'exemple ci‑contre, le joueur peut annoncer sa victoire
+avec *Ron* sur la défausse du joueur en face en complétant sa
+combinaison.~
