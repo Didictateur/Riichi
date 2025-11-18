@@ -43,6 +43,13 @@ export class Game {
   private selectedTile: number | undefined = undefined;
   private canCall: boolean = false;
   private declaredRiichi: boolean[] = [];
+  // Version counters to detect when a hand changed (to avoid recomputing expensive sims every frame)
+  private handVersion: number[] = [];
+  // Tenpai cache per player
+  private tenpaiCache: boolean[] = [];
+  private tenpaiCacheVersion: number[] = [];
+  // canRon cache for player 0 relative to lastDiscard
+  private canRonCache: { lastDiscard?: number; handVer?: number; result: boolean } = { result: false };
   private hasPicked: boolean = false;
   private hasPlayed: boolean = false;
   private lastPlayed: number = Date.now();
@@ -85,9 +92,93 @@ export class Game {
     this.initializeGame();
   }
 
+  private drawDynamic(ctx: CanvasRenderingContext2D): void {
+    // Redraw player's hand on top to show focused tile
+    const { HAND_SIZE } = GAME_CONSTANTS.DISPLAY;
+    this.hands[0].drawHand(
+      ctx,
+      2.5 * 75 * 0.75,
+      1000 - 150 * HAND_SIZE,
+      5 * HAND_SIZE,
+      0.75,
+      this.selectedTile,
+      false,
+      0
+    );
+
+    // If a tile is selected, highlight matching discarded tiles
+    if (this.selectedTile !== undefined) {
+      const highlighted = this.hands[0].get(this.selectedTile) as Tile;
+      const sizeDiscard = GAME_CONSTANTS.DISPLAY.DISCARD_SIZE;
+      for (let p = 0; p < GAME_CONSTANTS.PLAYERS; p++) {
+        const d = this.discards[p];
+        if (!d || d.length === 0) continue;
+        ctx.save();
+        ctx.translate(525, 525);
+        ctx.rotate(this.rotations[p]);
+        for (let i = 0; i < d.length; i++) {
+          const tile = d[i];
+          if (!highlighted.isEqual(tile.getFamily(), tile.getValue())) continue;
+          let tx, ty;
+          if (i < 12) {
+            tx = -sizeDiscard * 475 / 2 + (i % 6) * 80 * sizeDiscard;
+            ty = sizeDiscard * (475 / 2 + 5) + Math.floor(i / 6) * 105 * sizeDiscard;
+          } else {
+            tx = -sizeDiscard * 475 / 2 + (i - 12) * 80 * sizeDiscard;
+            ty = sizeDiscard * (475 / 2 + 5) + 2 * 105 * sizeDiscard;
+          }
+          // Draw highlighted version on top
+          tile.drawTile(ctx, tx, ty, sizeDiscard, false, 0, true);
+        }
+        ctx.restore();
+      }
+    }
+
+    // Draw call buttons / chiis on top
+    if (this.chooseChii) {
+      drawChiis(ctx, this.getChii(0));
+    } else {
+      const canTsumoLocal = this.hasPicked && this.hasWin(0);
+      let canRonLocal = false;
+      if (this.lastDiscard !== undefined && this.lastDiscard !== 0) {
+        if (this.canRonCache.lastDiscard === this.lastDiscard && this.canRonCache.handVer === this.handVersion[0]) {
+          canRonLocal = this.canRonCache.result;
+        } else {
+          const d = this.discards[this.lastDiscard];
+          if (d && d.length > 0) {
+            const last = d[d.length - 1];
+            const sim = new Hand();
+            for (const t of this.hands[0].getTiles()) {
+              sim.push(new Tile(t.getFamily(), t.getValue(), t.isRed()));
+            }
+            sim.push(new Tile(last.getFamily(), last.getValue(), last.isRed()));
+            sim.sort();
+            canRonLocal = sim.toGroup() !== undefined;
+          } else {
+            canRonLocal = false;
+          }
+          this.canRonCache = { lastDiscard: this.lastDiscard, handVer: this.handVersion[0], result: canRonLocal };
+        }
+      }
+
+      const canRiichiLocal = this.canDeclareRiichi(0);
+      drawButtons(
+        ctx,
+        this.canDoAChii().length > 0,
+        this.canDoAPon(),
+        false && this.level > 1,
+        canRonLocal,
+        canTsumoLocal,
+        canRiichiLocal
+      );
+    }
+  }
+
   // Last detected yakus for the most recent win (player index => list)
   private lastYakus: Array<{ name: string; han: number }> = [];
   private lastTotalHan: number = 0;
+  // Static/dynamic rendering optimization: when true we redraw the static buffer
+  private staticDirty: boolean = true;
 
   /**
    * Compute yakus for a given player and populate lastYakus/lastTotalHan.
@@ -133,6 +224,7 @@ export class Game {
 
     this.end = true;
     this.result = resultCode;
+    this.staticDirty = true;
   }
 
   private initializeGame(): void {
@@ -149,32 +241,98 @@ export class Game {
       this.discards.push([]);
       this.groups.push([]);
       this.declaredRiichi.push(false);
+      this.handVersion.push(0);
+      this.tenpaiCache.push(false);
+      this.tenpaiCacheVersion.push(-1);
     }
     
     this.lastDiscard = undefined;
     this.hands[0].sort();
     if (this.turn === 0) this.pick(0);
+    this.staticDirty = true;
   }
 
   public draw(mp: MousePos): void {
-    // Clear static canvas once per frame
-    this.staticCtx.clearRect(0, 0, this.cv.width, this.cv.height);
-    
-    // Draw background
-    this.staticCtx.fillStyle = this.BG_RECT.color;
-    this.staticCtx.fillRect(
-      this.BG_RECT.x,
-      this.BG_RECT.y,
-      this.BG_RECT.w,
-      this.BG_RECT.h
-    );
-    
+    // Update selection and game state
     this.getSelected(mp);
-    this.drawGame();
-    
-    // Use a single drawImage operation instead of clearing and redrawing
+    this.play();
+
+    // Rebuild static buffer only when needed
+    if (this.staticDirty) {
+      this.staticCtx.clearRect(0, 0, this.cv.width, this.cv.height);
+      // Draw background
+      this.staticCtx.fillStyle = this.BG_RECT.color;
+      this.staticCtx.fillRect(
+        this.BG_RECT.x,
+        this.BG_RECT.y,
+        this.BG_RECT.w,
+        this.BG_RECT.h
+      );
+
+      // Draw mostly-static elements
+      drawState(this.staticCtx, this.turn, GAME_CONSTANTS.PI / 2 * this.windPlayer);
+      this.drawDiscardSize();
+      this.drawResult();
+      // Draw hands without focused (focused tile rendered in dynamic overlay)
+      const showHands = false;
+      const { HAND_SIZE, HIDDEN_HAND_SIZE } = GAME_CONSTANTS.DISPLAY;
+      this.hands[0].drawHand(
+        this.staticCtx,
+        2.5 * 75 * 0.75,
+        1000 - 150 * HAND_SIZE,
+        5 * HAND_SIZE,
+        0.75,
+        undefined,
+        false,
+        0,
+        this.selectedTile
+      );
+      this.hands[1].drawHand(
+        this.staticCtx,
+        1000 - 150 * HIDDEN_HAND_SIZE,
+        1000 - 75 * 5 * HIDDEN_HAND_SIZE,
+        5 * HIDDEN_HAND_SIZE,
+        HIDDEN_HAND_SIZE,
+        undefined,
+        !showHands,
+        -GAME_CONSTANTS.PI / 2
+      );
+      this.hands[2].drawHand(
+        this.staticCtx,
+        1000 - 75 * 5 * HIDDEN_HAND_SIZE,
+        150 * HIDDEN_HAND_SIZE,
+        5 * HIDDEN_HAND_SIZE,
+        HIDDEN_HAND_SIZE,
+        undefined,
+        !showHands,
+        -GAME_CONSTANTS.PI
+      );
+      this.hands[3].drawHand(
+        this.staticCtx,
+        150 * HIDDEN_HAND_SIZE,
+        75 * 5 * HIDDEN_HAND_SIZE,
+        5 * HIDDEN_HAND_SIZE,
+        HIDDEN_HAND_SIZE,
+        undefined,
+        !showHands,
+        GAME_CONSTANTS.PI / 2
+      );
+
+      // Draw groups and discards (no per-frame highlights)
+      this.drawGroups(GAME_CONSTANTS.DISPLAY.GROUP_SIZE);
+      for (let i = 0; i < GAME_CONSTANTS.PLAYERS; i++) {
+        this.drawDiscard(i, undefined);
+      }
+
+      this.staticDirty = false;
+    }
+
+    // Blit static buffer
     this.ctx.clearRect(0, 0, this.cv.width, this.cv.height);
     this.ctx.drawImage(this.staticCv, 0, 0);
+
+    // Draw dynamic overlay: selection, highlights, buttons, chiis
+    this.drawDynamic(this.ctx);
   }
 
   public getDeck(): Deck {
@@ -266,9 +424,9 @@ export class Game {
       const chiis = this.canDoAChii();
       if (chiis.length === 1) {
         this.chii(chiis[0], 0);
-      } else {
+        } else {
         this.chooseChii = true;
-        this.drawGame();
+        this.staticDirty = true;
       }
     } else if (action === 2) { // Pon
       this.pon(this.turn);
@@ -309,17 +467,24 @@ export class Game {
     
     const tileIndex = Math.floor(mouseX / (tileWidth * sizeHand));
     const relativeX = mouseX - tileIndex * tileWidth * sizeHand;
-    
-    if (
+    // Determine whether selection changed and only mark static buffer dirty
+    // when it did. This prevents ghosting where the static layer still
+    // contains the tile at its original position while the dynamic layer
+    // draws the lifted tile.
+    const inBounds = (
       relativeX <= (tileWidth - 3) * sizeHand &&
       tileIndex >= 0 &&
       tileIndex < this.hands[0].length() &&
       mouseY >= y &&
       mouseY <= y + 100 * sizeHand
-    ) {
-      this.selectedTile = tileIndex;
-    } else {
-      this.selectedTile = undefined;
+    );
+
+    const newSelected = inBounds ? tileIndex : undefined;
+    if (newSelected !== this.selectedTile) {
+      this.selectedTile = newSelected;
+      // Force static buffer rebuild so the static hand skips drawing the
+      // selected tile (we pass skipIndex when drawing static hand).
+      this.staticDirty = true;
     }
   }
 
@@ -439,6 +604,12 @@ export class Game {
   private pick(player: number): void {
     this.hands[player].push(this.deck.pop());
     this.hands[player].isolate = true;
+    // mark hand as changed
+    this.handVersion[player] = (this.handVersion[player] || 0) + 1;
+    this.tenpaiCacheVersion[player] = -1;
+    // changing hand invalidates ron cache
+    this.canRonCache = { result: false };
+    this.staticDirty = true;
   }
 
   private discard(player: number, n: number): void {
@@ -453,6 +624,11 @@ export class Game {
     
     this.lastDiscard = player;
     this.lastPlayed = Date.now();
+    // mark hand as changed
+    this.handVersion[player] = (this.handVersion[player] || 0) + 1;
+    this.tenpaiCacheVersion[player] = -1;
+    this.canRonCache = { result: false };
+    this.staticDirty = true;
   }
 
   private canDoAChii(p: number = 0): Array<number> {
@@ -515,6 +691,11 @@ export class Game {
     // Create new group
     this.groups[p].push(new Group([t, tt[0], tt[1]], discardPlayer, p));
     
+    // mark hand changed for player p
+    this.handVersion[p] = (this.handVersion[p] || 0) + 1;
+    this.tenpaiCacheVersion[p] = -1;
+    this.canRonCache = { result: false };
+
     if (this.hasWin(p)) {
       this.resolveWin(p, p === 0 ? 1 : 2);
     }
@@ -582,9 +763,18 @@ export class Game {
    * We simulate adding any possible tile and check if it yields a winning hand.
    */
   private isTenpai(player: number): boolean {
+    // Use cached result when hand hasn't changed
+    if (this.tenpaiCacheVersion[player] === this.handVersion[player]) {
+      return this.tenpaiCache[player];
+    }
+
     const h = this.hands[player];
     // quick guard: hand should not already be winning
-    if (h.toGroup() !== undefined) return false;
+    if (h.toGroup() !== undefined) {
+      this.tenpaiCache[player] = false;
+      this.tenpaiCacheVersion[player] = this.handVersion[player];
+      return false;
+    }
 
     // Try all possible tile types
     // suits 1..3 values 1..9
@@ -596,7 +786,11 @@ export class Game {
         }
         sim.push(new Tile(fam, val, false));
         sim.sort();
-        if (sim.toGroup() !== undefined) return true;
+        if (sim.toGroup() !== undefined) {
+          this.tenpaiCache[player] = true;
+          this.tenpaiCacheVersion[player] = this.handVersion[player];
+          return true;
+        }
       }
     }
 
@@ -608,7 +802,11 @@ export class Game {
       }
       sim.push(new Tile(4, val, false));
       sim.sort();
-      if (sim.toGroup() !== undefined) return true;
+      if (sim.toGroup() !== undefined) {
+        this.tenpaiCache[player] = true;
+        this.tenpaiCacheVersion[player] = this.handVersion[player];
+        return true;
+      }
     }
 
     // dragons family 5 values 1..3
@@ -619,9 +817,16 @@ export class Game {
       }
       sim.push(new Tile(5, val, false));
       sim.sort();
-      if (sim.toGroup() !== undefined) return true;
+      if (sim.toGroup() !== undefined) {
+        this.tenpaiCache[player] = true;
+        this.tenpaiCacheVersion[player] = this.handVersion[player];
+        return true;
+      }
     }
 
+    // update cache
+    this.tenpaiCache[player] = false;
+    this.tenpaiCacheVersion[player] = this.handVersion[player];
     return false;
   }
 
@@ -640,8 +845,8 @@ export class Game {
   private declareRiichi(player: number): void {
     this.declaredRiichi[player] = true;
     // For now we only set the flag. In a full implementation we'd place the riichi stick,
-    // lock the hand, and handle the bet. We redraw to update UI.
-    this.drawGame();
+    // lock the hand, and handle the bet. Mark static buffer dirty so UI updates next frame.
+    this.staticDirty = true;
   }
 
   private pon(p: number, thief: number = 0): void {
@@ -655,6 +860,11 @@ export class Game {
     
     this.groups[thief].push(new Group([t, t2, t3], p, thief));
     
+    // mark thief hand changed
+    this.handVersion[thief] = (this.handVersion[thief] || 0) + 1;
+    this.tenpaiCacheVersion[thief] = -1;
+    this.canRonCache = { result: false };
+
     if (this.hasWin(thief)) {
       this.resolveWin(thief, thief === 0 ? 1 : 2);
     }
@@ -696,16 +906,25 @@ export class Game {
       const canTsumoLocal = this.hasPicked && this.hasWin(0);
       let canRonLocal = false;
       if (this.lastDiscard !== undefined && this.lastDiscard !== 0) {
-        const d = this.discards[this.lastDiscard];
-        if (d && d.length > 0) {
-          const last = d[d.length - 1];
-          const sim = new Hand();
-          for (const t of this.hands[0].getTiles()) {
-            sim.push(new Tile(t.getFamily(), t.getValue(), t.isRed()));
+        // Use cache when lastDiscard and player's hand version are unchanged
+        if (this.canRonCache.lastDiscard === this.lastDiscard && this.canRonCache.handVer === this.handVersion[0]) {
+          canRonLocal = this.canRonCache.result;
+        } else {
+          const d = this.discards[this.lastDiscard];
+          if (d && d.length > 0) {
+            const last = d[d.length - 1];
+            const sim = new Hand();
+            for (const t of this.hands[0].getTiles()) {
+              sim.push(new Tile(t.getFamily(), t.getValue(), t.isRed()));
+            }
+            sim.push(new Tile(last.getFamily(), last.getValue(), last.isRed()));
+            sim.sort();
+            canRonLocal = sim.toGroup() !== undefined;
+          } else {
+            canRonLocal = false;
           }
-          sim.push(new Tile(last.getFamily(), last.getValue(), last.isRed()));
-          sim.sort();
-          canRonLocal = sim.toGroup() !== undefined;
+          // update cache
+          this.canRonCache = { lastDiscard: this.lastDiscard, handVer: this.handVersion[0], result: canRonLocal };
         }
       }
 

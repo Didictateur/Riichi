@@ -327,13 +327,20 @@ export class Hand {
     size: number,
     focusedTile: number | undefined = undefined,
     hidden: boolean = false,
-    rotation: number = 0
+    rotation: number = 0,
+    // If provided, skip drawing this tile index (useful when the focused
+    // tile is rendered on a dynamic overlay to avoid seeing the unshifted
+    // tile under the lifted one).
+    skipIndex?: number
   ): void {
     const tileOffset = (75 + offset) * size;
     const offsetX = Math.cos(rotation) * tileOffset;
     const offsetY = Math.sin(rotation) * tileOffset;
     
     for (let i = 0; i < this.tiles.length; i++) {
+      // Optionally skip drawing a specific tile (prevents ghosting when the
+      // focused tile is drawn separately in a dynamic overlay).
+      if (skipIndex !== undefined && i === skipIndex) continue;
       const isLastAndIsolated = (i === this.tiles.length - 1 && this.isolate) ? 10 : 0;
       
       // Calculate position
