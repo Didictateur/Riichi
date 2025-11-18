@@ -1,30 +1,27 @@
 ~Introduction~
 
-Bienvenue sur ce site dédié au *Mahjong* !
+Bienvenue sur ce site dédié au *Riichi Mahjong* !
 
-Ce site est principalement destiné aux personnes découvrant ce
+Ce site s'adresse principalement aux personnes découvrant ce
 formidable jeu.
 
-Le nombre de chapitre de chaque section peut faire peur aux
-premiers abords, mais chacun deux n'est pas plus long que ce
-même texte
+Le nombre de chapitres par section peut sembler impressionnant
+au premier abord, mais chacun d'eux reste court et facilement
+abordable.
 
-Cependant, de nombreux services y sont proposés:
+Vous trouverez notamment :
 
-- *Initiation riichi majhong* dans l'onglet #ff00ff{Riichi Mahjong}
+- *Initiation au Riichi Mahjong* dans l'onglet #ff00ff{Riichi Mahjong}.
 
-- *Explication d'une partie en physique* dans l'onglet #ff00ff{Partie
-  réelle} pour comprendre comment y jouer dans la vraie vie
+- *Explication d'une partie réelle* dans l'onglet #ff00ff{Partie réelle}
+  pour apprendre à jouer en conditions réelles.
 
-- *Introduction à une variante* dans l'onglet #ff00ff{Riichi à trois}
+- *Présentation d'une variante* dans l'onglet #ff00ff{Riichi à trois}.
 
-- *Un entrainement aux différents Yakus* dans l'onglet #ff00ff{Yaku
-  trainer}
+- *Entraînement aux différents Yakus* dans l'onglet #ff00ff{Yaku trainer}.
 
-- *Une introduction au MCR*, la variante chinoise dans l'onglet
-  #ff00ff{MCR}
+- *Introduction au MCR* (variante chinoise) dans l'onglet #ff00ff{MCR}.
 
-Evidemment, ce site n'est pas encore fini, et possède encore
-beaucoup de problème. Pour le moindre retour, ne pas hésiter
-à le faire savoir directement sur le Github pour pour aider
-à l'améliorer.
+Ce site est en développement — il contient encore des pages incomplètes
+et des améliorations à apporter. N'hésitez pas à poster vos retours
+sur le dépôt GitHub pour contribuer à son amélioration.
