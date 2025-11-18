@@ -250,6 +250,46 @@ export class Game {
     return false;
   }
 
+  /**
+   * Return full list of yakus for a given hand+groups (doesn't mutate state)
+   */
+  private getYakusForHand(hand: Hand, groups: Array<Group> = []): Array<{ name: string; han: number }> {
+    const res: Array<{ name: string; han: number }> = [];
+    try {
+      for (const k of Object.keys(yakus)) {
+        const fn = (yakus as any)[k];
+        try {
+          const han = fn(hand, groups, this.windPlayer);
+          if (han && han > 0) res.push({ name: k, han });
+        } catch (e) {
+          // ignore individual detector errors
+        }
+      }
+    } catch (e) {
+      // ignore
+    }
+    return res;
+  }
+
+  // Helper: human-readable tile label for logging
+  private formatTile(t: Tile): string {
+    const fam = t.getFamily();
+    const val = t.getValue();
+    if (fam >= 1 && fam <= 3) {
+      const names = ["", "Man", "Pin", "Sou"];
+      return `${names[fam]}${val}${t.isRed() ? "(r)" : ""}`;
+    }
+    if (fam === 4) {
+      const winds = ["", "Ton", "Nan", "Shaa", "Pei"];
+      return winds[val];
+    }
+    if (fam === 5) {
+      const dr = ["", "Chun", "Hatsu", "Haku"];
+      return dr[val];
+    }
+    return `F${fam}V${val}`;
+  }
+
   private initializeGame(): void {
     this.deck.shuffle();
     
@@ -818,6 +858,18 @@ export class Game {
           this.tenpaiCacheVersion[player] = this.handVersion[player];
           return true;
         }
+        // also try red five
+        if (val === 5) {
+          const simR = new Hand();
+          for (const t of h.getTiles()) simR.push(new Tile(t.getFamily(), t.getValue(), t.isRed()));
+          simR.push(new Tile(fam, val, true));
+          simR.sort();
+          if (simR.toGroup() !== undefined) {
+            this.tenpaiCache[player] = true;
+            this.tenpaiCacheVersion[player] = this.handVersion[player];
+            return true;
+          }
+        }
       }
     }
 
@@ -827,7 +879,7 @@ export class Game {
       for (const t of h.getTiles()) {
         sim.push(new Tile(t.getFamily(), t.getValue(), t.isRed()));
       }
-      sim.push(new Tile(4, val, false));
+        sim.push(new Tile(4, val, false));
       sim.sort();
       if (sim.toGroup() !== undefined) {
         this.tenpaiCache[player] = true;
@@ -849,6 +901,7 @@ export class Game {
         this.tenpaiCacheVersion[player] = this.handVersion[player];
         return true;
       }
+      // try red dragon? dragons don't have red variants, skip
     }
 
     // update cache
@@ -866,7 +919,284 @@ export class Game {
     if (!this.hasPicked || this.hasPlayed) return false;
     if (this.groups[player] && this.groups[player].length > 0) return false; // not closed
     if (this.declaredRiichi[player]) return false;
-    return this.isTenpai(player);
+    // When yakus are enabled, allow Riichi either when in tenpai normally
+    // or when at least one winning tile would produce a yaku.
+    const hand = this.hands[player];
+    // If the player currently has 14 tiles (just drawn), check any possible
+    // 13-tile variant (remove one tile) for tenpai rules.
+    if (hand.length && hand.length() === 14) {
+      const tiles = hand.getTiles();
+      const removableLabels: string[] = [];
+      const perRemoval: Array<any> = [];
+      for (let i = 0; i < 14; i++) {
+        const sim = new Hand();
+        for (let j = 0; j < tiles.length; j++) {
+          if (j === i) continue;
+          const t = tiles[j];
+          sim.push(new Tile(t.getFamily(), t.getValue(), t.isRed()));
+        }
+        sim.sort();
+        const isTen = this.handIsTenpai(sim);
+        const info: any = { removed: this.formatTile(tiles[i]), isTenpai: isTen };
+        let foundWinningTiles: string[] = [];
+        let yakusPerWin: Record<string, Array<{ name: string; han: number }>> = {};
+
+        // If yakus are enabled, search winning tiles and list yakus
+        if (this.enableYakus) {
+          // iterate all possible tile types
+          for (let fam = 1; fam <= 3; fam++) {
+            for (let val = 1; val <= 9; val++) {
+              const sim2 = new Hand();
+              for (const t of sim.getTiles()) sim2.push(new Tile(t.getFamily(), t.getValue(), t.isRed()));
+              sim2.push(new Tile(fam, val, false));
+              sim2.sort();
+              if (sim2.toGroup() !== undefined) {
+                const simGroups = sim2.toGroup() as Array<Group> | undefined;
+                const combined = this.groups[player].concat(simGroups ? simGroups : []);
+                const yakuList = this.getYakusForHand(sim2, combined);
+                const tileLabel = this.formatTile(new Tile(fam, val, false));
+                foundWinningTiles.push(tileLabel);
+                yakusPerWin[tileLabel] = yakuList;
+              }
+              // try red five variant
+              if (val === 5) {
+                const sim2r = new Hand();
+                for (const t of sim.getTiles()) sim2r.push(new Tile(t.getFamily(), t.getValue(), t.isRed()));
+                sim2r.push(new Tile(fam, val, true));
+                sim2r.sort();
+                if (sim2r.toGroup() !== undefined) {
+                  const simGroups = sim2r.toGroup() as Array<Group> | undefined;
+                  const combined = this.groups[player].concat(simGroups ? simGroups : []);
+                  const yakuList = this.getYakusForHand(sim2r, combined);
+                  const tileLabel = this.formatTile(new Tile(fam, val, true));
+                  foundWinningTiles.push(tileLabel);
+                  yakusPerWin[tileLabel] = yakuList;
+                }
+              }
+            }
+          }
+          for (let val = 1; val <= 4; val++) {
+            const sim2 = new Hand();
+            for (const t of sim.getTiles()) sim2.push(new Tile(t.getFamily(), t.getValue(), t.isRed()));
+            sim2.push(new Tile(4, val, false));
+            sim2.sort();
+            if (sim2.toGroup() !== undefined) {
+              const simGroups = sim2.toGroup() as Array<Group> | undefined;
+              const combined = this.groups[player].concat(simGroups ? simGroups : []);
+              const yakuList = this.getYakusForHand(sim2, combined);
+              const tileLabel = this.formatTile(new Tile(4, val, false));
+              foundWinningTiles.push(tileLabel);
+              yakusPerWin[tileLabel] = yakuList;
+            }
+          }
+          for (let val = 1; val <= 3; val++) {
+            const sim2 = new Hand();
+            for (const t of sim.getTiles()) sim2.push(new Tile(t.getFamily(), t.getValue(), t.isRed()));
+            sim2.push(new Tile(5, val, false));
+            sim2.sort();
+            if (sim2.toGroup() !== undefined) {
+              const simGroups = sim2.toGroup() as Array<Group> | undefined;
+              const combined = this.groups[player].concat(simGroups ? simGroups : []);
+              const yakuList = this.getYakusForHand(sim2, combined);
+              const tileLabel = this.formatTile(new Tile(5, val, false));
+              foundWinningTiles.push(tileLabel);
+              yakusPerWin[tileLabel] = yakuList;
+            }
+          }
+        } else {
+          // If yakus not enabled but sim is tenpai, we still consider it removable
+          if (!isTen) {
+            // no-op
+          }
+        }
+
+        info.winningTiles = foundWinningTiles;
+        info.yakusPerWin = yakusPerWin;
+        perRemoval.push(info);
+        if (!this.enableYakus && isTen) removableLabels.push(this.formatTile(tiles[i]));
+        if (this.enableYakus && foundWinningTiles.length > 0) removableLabels.push(this.formatTile(tiles[i]));
+      }
+      if (player === 0) {
+        if (removableLabels.length > 0) {
+          console.debug("canDeclareRiichi (14->13) removable tiles:", removableLabels);
+        } else {
+          console.debug("canDeclareRiichi (14->13) no removable tile makes tenpai", { player });
+        }
+        // Detailed per-removal dump for debugging
+        console.debug("canDeclareRiichi (14->13) details:", perRemoval);
+      }
+      return removableLabels.length > 0;
+    }
+
+    if (!this.enableYakus) {
+      const res = this.isTenpai(player);
+      if (player === 0) console.debug("canDeclareRiichi (yakus disabled) ->", { player, turn: this.turn, hasPicked: this.hasPicked, hasPlayed: this.hasPlayed, groups: this.groups[player]?.length, declaredRiichi: this.declaredRiichi[player], isTenpai: res });
+      return res;
+    }
+    const tenpai = this.isTenpai(player);
+    const tenpaiY = this.isTenpaiWithYaku(player);
+    if (player === 0) console.debug("canDeclareRiichi ->", { player, turn: this.turn, hasPicked: this.hasPicked, hasPlayed: this.hasPlayed, groups: this.groups[player]?.length, declaredRiichi: this.declaredRiichi[player], isTenpai: tenpai, isTenpaiWithYaku: tenpaiY });
+    return tenpai || tenpaiY;
+  }
+
+  // Helper: test tenpai for an arbitrary Hand instance (no caching)
+  private handIsTenpai(h: Hand): boolean {
+    // quick guard: hand should not already be winning
+    if (h.toGroup() !== undefined) return false;
+
+    // suits 1..3 values 1..9
+    for (let fam = 1; fam <= 3; fam++) {
+      for (let val = 1; val <= 9; val++) {
+        const sim = new Hand();
+        for (const t of h.getTiles()) sim.push(new Tile(t.getFamily(), t.getValue(), t.isRed()));
+        sim.push(new Tile(fam, val, false));
+        sim.sort();
+        if (sim.toGroup() !== undefined) return true;
+        if (val === 5) {
+          const simR = new Hand();
+          for (const t of h.getTiles()) simR.push(new Tile(t.getFamily(), t.getValue(), t.isRed()));
+          simR.push(new Tile(fam, val, true));
+          simR.sort();
+          if (simR.toGroup() !== undefined) return true;
+        }
+      }
+    }
+
+    // winds family 4 values 1..4
+    for (let val = 1; val <= 4; val++) {
+      const sim = new Hand();
+      for (const t of h.getTiles()) sim.push(new Tile(t.getFamily(), t.getValue(), t.isRed()));
+      sim.push(new Tile(4, val, false));
+      sim.sort();
+      if (sim.toGroup() !== undefined) return true;
+    }
+
+    // dragons family 5 values 1..3
+    for (let val = 1; val <= 3; val++) {
+      const sim = new Hand();
+      for (const t of h.getTiles()) sim.push(new Tile(t.getFamily(), t.getValue(), t.isRed()));
+      sim.push(new Tile(5, val, false));
+      sim.sort();
+      if (sim.toGroup() !== undefined) return true;
+    }
+
+    return false;
+  }
+
+  // Helper: for an arbitrary Hand, check if any winning tile produces >=1 yaku
+  private handIsTenpaiWithYaku(h: Hand, groups: Array<Group>): boolean {
+    // If already winning and has yaku
+    if (h.toGroup() !== undefined) {
+      const simGroups = h.toGroup() as Array<Group> | undefined;
+      const combined = groups.concat(simGroups ? simGroups : []);
+      return this.handHasAnyYaku(h, combined);
+    }
+
+    // suits
+    for (let fam = 1; fam <= 3; fam++) {
+      for (let val = 1; val <= 9; val++) {
+        const sim = new Hand();
+        for (const t of h.getTiles()) sim.push(new Tile(t.getFamily(), t.getValue(), t.isRed()));
+        sim.push(new Tile(fam, val, false));
+        sim.sort();
+        let simGroups = sim.toGroup() as Array<Group> | undefined;
+        if (simGroups !== undefined) {
+          const combined = groups.concat(simGroups);
+          if (this.handHasAnyYaku(sim, combined)) return true;
+        }
+        // try red five
+        if (val === 5) {
+          const simR = new Hand();
+          for (const t of h.getTiles()) simR.push(new Tile(t.getFamily(), t.getValue(), t.isRed()));
+          simR.push(new Tile(fam, val, true));
+          simR.sort();
+          simGroups = simR.toGroup() as Array<Group> | undefined;
+          if (simGroups !== undefined) {
+            const combined = groups.concat(simGroups);
+            if (this.handHasAnyYaku(simR, combined)) return true;
+          }
+        }
+      }
+    }
+
+    // winds
+    for (let val = 1; val <= 4; val++) {
+      const sim = new Hand();
+      for (const t of h.getTiles()) sim.push(new Tile(t.getFamily(), t.getValue(), t.isRed()));
+      sim.push(new Tile(4, val, false));
+      sim.sort();
+      const simGroups = sim.toGroup() as Array<Group> | undefined;
+      if (simGroups !== undefined) {
+        const combined = groups.concat(simGroups);
+        if (this.handHasAnyYaku(sim, combined)) return true;
+      }
+    }
+
+    // dragons
+    for (let val = 1; val <= 3; val++) {
+      const sim = new Hand();
+      for (const t of h.getTiles()) sim.push(new Tile(t.getFamily(), t.getValue(), t.isRed()));
+      sim.push(new Tile(5, val, false));
+      sim.sort();
+      const simGroups = sim.toGroup() as Array<Group> | undefined;
+      if (simGroups !== undefined) {
+        const combined = groups.concat(simGroups);
+        if (this.handHasAnyYaku(sim, combined)) return true;
+      }
+    }
+
+    return false;
+  }
+
+  /**
+   * Return true if the player's closed hand is waiting on at least one tile
+   * that would produce a winning hand containing at least one yaku.
+   */
+  private isTenpaiWithYaku(player: number): boolean {
+    const h = this.hands[player];
+    // If hand already winning and has yaku, it's trivially true
+    if (h.toGroup() !== undefined && this.handHasAnyYaku(h, this.groups[player])) return true;
+
+    // Try all possible tile types
+    for (let fam = 1; fam <= 3; fam++) {
+      for (let val = 1; val <= 9; val++) {
+        const sim = new Hand();
+        for (const t of h.getTiles()) sim.push(new Tile(t.getFamily(), t.getValue(), t.isRed()));
+        sim.push(new Tile(fam, val, false));
+        sim.sort();
+        const simGroups = sim.toGroup() as Array<Group> | undefined;
+        if (simGroups !== undefined) {
+          const combined = this.groups[player].concat(simGroups);
+          if (this.handHasAnyYaku(sim, combined)) return true;
+        }
+      }
+    }
+
+    for (let val = 1; val <= 4; val++) {
+      const sim = new Hand();
+      for (const t of h.getTiles()) sim.push(new Tile(t.getFamily(), t.getValue(), t.isRed()));
+      sim.push(new Tile(4, val, false));
+      sim.sort();
+      const simGroups = sim.toGroup() as Array<Group> | undefined;
+      if (simGroups !== undefined) {
+        const combined = this.groups[player].concat(simGroups);
+        if (this.handHasAnyYaku(sim, combined)) return true;
+      }
+    }
+
+    for (let val = 1; val <= 3; val++) {
+      const sim = new Hand();
+      for (const t of h.getTiles()) sim.push(new Tile(t.getFamily(), t.getValue(), t.isRed()));
+      sim.push(new Tile(5, val, false));
+      sim.sort();
+      const simGroups = sim.toGroup() as Array<Group> | undefined;
+      if (simGroups !== undefined) {
+        const combined = this.groups[player].concat(simGroups);
+        if (this.handHasAnyYaku(sim, combined)) return true;
+      }
+    }
+
+    return false;
   }
 
   private declareRiichi(player: number): void {
