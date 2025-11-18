@@ -147,14 +147,31 @@ export class Game {
       return;
     }
     
+    // Determine if Ron/Tsumo should be available for player 0
+    const canTsumo = this.hasPicked && this.hasWin(0);
+    let canRon = false;
+    if (this.lastDiscard !== undefined && this.lastDiscard !== 0) {
+      const d = this.discards[this.lastDiscard];
+      if (d && d.length > 0) {
+        const last = d[d.length - 1];
+        const sim = new Hand();
+        for (const t of this.hands[0].getTiles()) {
+          sim.push(new Tile(t.getFamily(), t.getValue(), t.isRed()));
+        }
+        sim.push(new Tile(last.getFamily(), last.getValue(), last.isRed()));
+        sim.sort();
+        canRon = sim.toGroup() !== undefined;
+      }
+    }
+
     const action = clickAction(
       mp.x - rect.x,
       mp.y - rect.y,
       this.canDoAChii().length > 0,
       this.canDoAPon(),
       false && this.level > 1,
-      false && this.level > 0,
-      false && this.level > 0
+      canRon,
+      canTsumo
     );
     
     if (this.canCall && action !== -1) {
@@ -284,7 +301,7 @@ export class Game {
       const n = Math.floor(this.hands[this.turn].length() * Math.random());
       this.discard(this.turn, n);
       this.hasPlayed = true;
-      
+
       if (this.deck.length() <= 0) {
         this.result = 0;
         this.end = true;
@@ -292,11 +309,42 @@ export class Game {
       }
       
       if (!this.end) {
+        // If any player (including player 0) can Ron on this discard, open the call window
+        const anyRon = this.canAnyPlayerRon(this.turn);
+        if (anyRon) {
+          this.canCall = true;
+          return;
+        }
+
+        // Otherwise proceed with normal automatic pon/chii resolution
         this.checkPon();
         this.checkForChii();
         this.canCall = this.canDoAChii().length > 0 || this.canDoAPon();
       }
     }
+  }
+
+  /**
+   * Check if any other player can Ron on the last discard performed by discardPlayer.
+   * This builds a simulated hand for each candidate player to avoid mutating state.
+   */
+  private canAnyPlayerRon(discardPlayer: number): boolean {
+    const d = this.discards[discardPlayer];
+    if (!d || d.length === 0) return false;
+    const last = d[d.length - 1];
+
+    for (let p = 0; p < GAME_CONSTANTS.PLAYERS; p++) {
+      if (p === discardPlayer) continue;
+      const sim = new Hand();
+      for (const t of this.hands[p].getTiles()) {
+        sim.push(new Tile(t.getFamily(), t.getValue(), t.isRed()));
+      }
+      sim.push(new Tile(last.getFamily(), last.getValue(), last.isRed()));
+      sim.sort();
+      if (sim.toGroup() !== undefined) return true;
+    }
+
+    return false;
   }
 
   private checkForChii(): void {
@@ -519,13 +567,30 @@ export class Game {
     if (this.chooseChii) {
       drawChiis(this.staticCtx, this.getChii(0));
     } else {
+      // Compute availability of ron/tsumo for player 0
+      const canTsumoLocal = this.hasPicked && this.hasWin(0);
+      let canRonLocal = false;
+      if (this.lastDiscard !== undefined && this.lastDiscard !== 0) {
+        const d = this.discards[this.lastDiscard];
+        if (d && d.length > 0) {
+          const last = d[d.length - 1];
+          const sim = new Hand();
+          for (const t of this.hands[0].getTiles()) {
+            sim.push(new Tile(t.getFamily(), t.getValue(), t.isRed()));
+          }
+          sim.push(new Tile(last.getFamily(), last.getValue(), last.isRed()));
+          sim.sort();
+          canRonLocal = sim.toGroup() !== undefined;
+        }
+      }
+
       drawButtons(
         this.staticCtx,
         this.canDoAChii().length > 0,
         this.canDoAPon(),
         false && this.level > 1,
-        false && this.level > 0,
-        false && this.level > 0
+        canRonLocal,
+        canTsumoLocal
       );
     }
   }
