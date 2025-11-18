@@ -4,6 +4,7 @@ import { Tile } from "./tile";
 import { Group } from "./group";
 import { drawButtons, clickAction, drawChiis, clickChii } from "./button";
 import { drawState } from "./state";
+import { yakus } from "./yakus/yaku";
 
 export type MousePos = { x: number, y: number };
 
@@ -41,6 +42,7 @@ export class Game {
   private waitingTime = GAME_CONSTANTS.WAITING_TIME.DEFAULT;
   private selectedTile: number | undefined = undefined;
   private canCall: boolean = false;
+  private declaredRiichi: boolean[] = [];
   private hasPicked: boolean = false;
   private hasPlayed: boolean = false;
   private lastPlayed: number = Date.now();
@@ -58,6 +60,8 @@ export class Game {
   private readonly BG_RECT = GAME_CONSTANTS.BACKGROUND;
   private readonly rotations = [0, -GAME_CONSTANTS.PI / 2, -GAME_CONSTANTS.PI, GAME_CONSTANTS.PI / 2];
 
+  // When enableYakus is true the game will evaluate yakus on any win and
+  // store the detected yakus for display.
   constructor(
     ctx: CanvasRenderingContext2D,
     cv: HTMLCanvasElement,
@@ -65,7 +69,8 @@ export class Game {
     staticCv: HTMLCanvasElement,
     red: boolean = false,
     level: number = 0,
-		windPlayer: number = 0
+    windPlayer: number = 0,
+    private enableYakus: boolean = false
   ) {
     this.ctx = ctx;
     this.cv = cv;
@@ -78,6 +83,56 @@ export class Game {
     // Initialize game elements
     this.deck = new Deck(red);
     this.initializeGame();
+  }
+
+  // Last detected yakus for the most recent win (player index => list)
+  private lastYakus: Array<{ name: string; han: number }> = [];
+  private lastTotalHan: number = 0;
+
+  /**
+   * Compute yakus for a given player and populate lastYakus/lastTotalHan.
+   * This uses the exported `yakus` table where each entry returns han (0 if not present).
+   */
+  private computeYakusForPlayer(player: number): void {
+    this.lastYakus = [];
+    this.lastTotalHan = 0;
+
+    try {
+      const hand = this.hands[player];
+      const groups = this.groups[player] || [];
+
+      for (const k of Object.keys(yakus)) {
+        // Call each yaku detector with (hand, groups, wind)
+        // Some detector functions expect the player's wind as an index
+        const fn = (yakus as any)[k];
+        try {
+          const han = fn(hand, groups, this.windPlayer);
+          if (han && han > 0) {
+            this.lastYakus.push({ name: k, han });
+            this.lastTotalHan += han;
+          }
+        } catch (e) {
+          // Ignore errors in any individual detector to avoid breaking the flow
+          console.warn(`Yaku ${k} threw:`, e);
+        }
+      }
+    } catch (e) {
+      console.warn("Failed to compute yakus:", e);
+      this.lastYakus = [];
+      this.lastTotalHan = 0;
+    }
+  }
+
+  private resolveWin(player: number, resultCode: number, fromPlayer?: number): void {
+    if (this.enableYakus) {
+      this.computeYakusForPlayer(player);
+    } else {
+      this.lastYakus = [];
+      this.lastTotalHan = 0;
+    }
+
+    this.end = true;
+    this.result = resultCode;
   }
 
   private initializeGame(): void {
@@ -93,6 +148,7 @@ export class Game {
       this.hands.push(this.deck.getRandomHand());
       this.discards.push([]);
       this.groups.push([]);
+      this.declaredRiichi.push(false);
     }
     
     this.lastDiscard = undefined;
@@ -137,8 +193,7 @@ export class Game {
     const rect = this.cv.getBoundingClientRect();
     
     if (this.hasWin(0)) {
-      this.end = true;
-      this.result = 1;
+      this.resolveWin(0, 1);
       return;
     } 
     
@@ -164,6 +219,7 @@ export class Game {
       }
     }
 
+    const canRiichi = this.canDeclareRiichi(0);
     const action = clickAction(
       mp.x - rect.x,
       mp.y - rect.y,
@@ -171,11 +227,16 @@ export class Game {
       this.canDoAPon(),
       false && this.level > 1,
       canRon,
-      canTsumo
+      canTsumo,
+      canRiichi
     );
     
     if (this.canCall && action !== -1) {
       this.handleCallAction(action);
+    } else if (action === 6) { // Riichi action
+      if (canRiichi) {
+        this.declareRiichi(0);
+      }
     } else if (this.turn === 0 && this.selectedTile !== undefined) {
       this.handlePlayerDiscard();
     }
@@ -289,8 +350,7 @@ export class Game {
 
   private handleBotTurn(): void {
     if (this.hasWin(this.turn)) {
-      this.end = true;
-      this.result = 2;
+      this.resolveWin(this.turn, 2);
       return;
     }
     
@@ -303,6 +363,7 @@ export class Game {
       this.hasPlayed = true;
 
       if (this.deck.length() <= 0) {
+        // Draw / no tiles left
         this.result = 0;
         this.end = true;
         return;
@@ -364,8 +425,7 @@ export class Game {
       this.turn = 0;
       this.pick(0);
       if (this.hasWin(0)) {
-        this.end = true;
-        this.result = 1;
+        this.resolveWin(0, 1);
       }
     } else {
       this.turn++;
@@ -456,8 +516,7 @@ export class Game {
     this.groups[p].push(new Group([t, tt[0], tt[1]], discardPlayer, p));
     
     if (this.hasWin(p)) {
-      this.end = true;
-      this.result = p === 0 ? 1 : 2;
+      this.resolveWin(p, p === 0 ? 1 : 2);
     }
     
     this.updateWaitingTime();
@@ -518,6 +577,73 @@ export class Game {
     return this.hands[player].count(t.getFamily(), t.getValue()) >= 2;
   }
 
+  /**
+   * Check whether the given player's closed hand is in tenpai (waiting).
+   * We simulate adding any possible tile and check if it yields a winning hand.
+   */
+  private isTenpai(player: number): boolean {
+    const h = this.hands[player];
+    // quick guard: hand should not already be winning
+    if (h.toGroup() !== undefined) return false;
+
+    // Try all possible tile types
+    // suits 1..3 values 1..9
+    for (let fam = 1; fam <= 3; fam++) {
+      for (let val = 1; val <= 9; val++) {
+        const sim = new Hand();
+        for (const t of h.getTiles()) {
+          sim.push(new Tile(t.getFamily(), t.getValue(), t.isRed()));
+        }
+        sim.push(new Tile(fam, val, false));
+        sim.sort();
+        if (sim.toGroup() !== undefined) return true;
+      }
+    }
+
+    // winds family 4 values 1..4
+    for (let val = 1; val <= 4; val++) {
+      const sim = new Hand();
+      for (const t of h.getTiles()) {
+        sim.push(new Tile(t.getFamily(), t.getValue(), t.isRed()));
+      }
+      sim.push(new Tile(4, val, false));
+      sim.sort();
+      if (sim.toGroup() !== undefined) return true;
+    }
+
+    // dragons family 5 values 1..3
+    for (let val = 1; val <= 3; val++) {
+      const sim = new Hand();
+      for (const t of h.getTiles()) {
+        sim.push(new Tile(t.getFamily(), t.getValue(), t.isRed()));
+      }
+      sim.push(new Tile(5, val, false));
+      sim.sort();
+      if (sim.toGroup() !== undefined) return true;
+    }
+
+    return false;
+  }
+
+  private canDeclareRiichi(player: number): boolean {
+    // Only allow declaring Riichi for player 0 in the UI; general rule: it's the player's turn,
+    // they have just drawn (hasPicked true), haven't yet discarded (hasPlayed false), hand closed,
+    // in tenpai, and haven't already declared.
+    if (player !== 0) return false;
+    if (this.turn !== player) return false;
+    if (!this.hasPicked || this.hasPlayed) return false;
+    if (this.groups[player] && this.groups[player].length > 0) return false; // not closed
+    if (this.declaredRiichi[player]) return false;
+    return this.isTenpai(player);
+  }
+
+  private declareRiichi(player: number): void {
+    this.declaredRiichi[player] = true;
+    // For now we only set the flag. In a full implementation we'd place the riichi stick,
+    // lock the hand, and handle the bet. We redraw to update UI.
+    this.drawGame();
+  }
+
   private pon(p: number, thief: number = 0): void {
     const t = this.discards[p].pop() as Tile;
     this.lastDiscard = undefined;
@@ -530,8 +656,7 @@ export class Game {
     this.groups[thief].push(new Group([t, t2, t3], p, thief));
     
     if (this.hasWin(thief)) {
-      this.end = true;
-      this.result = thief === 0 ? 1 : 2;
+      this.resolveWin(thief, thief === 0 ? 1 : 2);
     }
     
     this.updateWaitingTime();
@@ -584,13 +709,15 @@ export class Game {
         }
       }
 
+      const canRiichiLocal = this.canDeclareRiichi(0);
       drawButtons(
         this.staticCtx,
         this.canDoAChii().length > 0,
         this.canDoAPon(),
         false && this.level > 1,
         canRonLocal,
-        canTsumoLocal
+        canTsumoLocal,
+        canRiichiLocal
       );
     }
   }
@@ -773,5 +900,14 @@ export class Game {
   public async preload(): Promise<void> {
     await this.deck.preload();
     await Promise.all(this.hands.map(h => h.preload()));
+  }
+
+  // Expose last yakus for UI/display when enabled
+  public getLastYakus(): Array<{ name: string; han: number }> {
+    return this.lastYakus;
+  }
+
+  public getLastTotalHan(): number {
+    return this.lastTotalHan;
   }
 }

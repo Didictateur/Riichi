@@ -36,6 +36,7 @@ const BUTTON_STYLES: Record<string, ButtonConfig> = {
   kan: { text: "Kan", color: "#FFCC33", action: 3 },
   ron: { text: "Ron", color: "#FF3060", action: 4 },
   tsumo: { text: "Tsumo", color: "#FF3060", action: 5 },
+  riichi: { text: "Riichi", color: "#66ccff", action: 6 },
   back: { text: "Retour", color: "#FF9030", action: 0 }
 };
 
@@ -50,9 +51,10 @@ export function clickAction(
   pon: boolean,
   kan: boolean,
   ron: boolean,
-  tsumo: boolean
+  tsumo: boolean,
+  riichi: boolean
 ): number {
-  const activeButtons = getActiveButtons(chii, pon, kan, ron, tsumo);
+  const activeButtons = getActiveButtons(chii, pon, kan, ron, tsumo, riichi);
   
   if (activeButtons.length === 0) {
     return -1;
@@ -91,14 +93,16 @@ export function drawButtons(
   pon: boolean,
   kan: boolean,
   ron: boolean,
-  tsumo: boolean
+  tsumo: boolean,
+  riichi: boolean
 ): void {
   const buttonFunctions: [boolean, ButtonRenderer][] = [
     [chii, (ctx, x, y) => renderButton(ctx, x, y, BUTTON_STYLES.chii)],
     [pon, (ctx, x, y) => renderButton(ctx, x, y, BUTTON_STYLES.pon)],
     [kan, (ctx, x, y) => renderButton(ctx, x, y, BUTTON_STYLES.kan)],
     [ron, (ctx, x, y) => renderButton(ctx, x, y, BUTTON_STYLES.ron)],
-    [tsumo, (ctx, x, y) => renderButton(ctx, x, y, BUTTON_STYLES.tsumo)]
+    [tsumo, (ctx, x, y) => renderButton(ctx, x, y, BUTTON_STYLES.tsumo)],
+    [riichi, (ctx, x, y) => renderButton(ctx, x, y, BUTTON_STYLES.riichi)]
   ];
   
   // Only show the pass button if at least one other button is active
@@ -227,11 +231,13 @@ function getActiveButtons(
   pon: boolean,
   kan: boolean,
   ron: boolean,
-  tsumo: boolean
+  tsumo: boolean,
+  riichi: boolean
 ): number[] {
   const buttonConfigs: [boolean, number][] = [
     [tsumo, BUTTON_STYLES.tsumo.action],
     [ron, BUTTON_STYLES.ron.action],
+    [riichi, BUTTON_STYLES.riichi.action],
     [kan, BUTTON_STYLES.kan.action],
     [pon, BUTTON_STYLES.pon.action],
     [chii, BUTTON_STYLES.chii.action]
