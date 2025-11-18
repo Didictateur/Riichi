@@ -138,7 +138,7 @@ export class Game {
     if (this.chooseChii) {
       drawChiis(ctx, this.getChii(0));
     } else {
-      const canTsumoLocal = this.hasPicked && this.hasWin(0);
+      const canTsumoLocal = this.hasPicked && this.hasWin(0) && (!this.enableYakus || this.handHasAnyYaku(this.hands[0], this.groups[0]));
       let canRonLocal = false;
       if (this.lastDiscard !== undefined && this.lastDiscard !== 0) {
         if (this.canRonCache.lastDiscard === this.lastDiscard && this.canRonCache.handVer === this.handVersion[0]) {
@@ -153,7 +153,9 @@ export class Game {
             }
             sim.push(new Tile(last.getFamily(), last.getValue(), last.isRed()));
             sim.sort();
-            canRonLocal = sim.toGroup() !== undefined;
+            const simGroups = sim.toGroup() as Array<Group> | undefined;
+            const combinedGroups = this.groups[0].concat(simGroups ? simGroups : []);
+            canRonLocal = sim.toGroup() !== undefined && (!this.enableYakus || this.handHasAnyYaku(sim, combinedGroups));
           } else {
             canRonLocal = false;
           }
@@ -225,6 +227,27 @@ export class Game {
     this.end = true;
     this.result = resultCode;
     this.staticDirty = true;
+  }
+
+  /**
+   * Check whether a given hand (possibly simulated) yields at least one yaku.
+   * Does not modify `lastYakus`/`lastTotalHan` — only inspects using yakus detectors.
+   */
+  private handHasAnyYaku(hand: Hand, groups: Array<Group> = []): boolean {
+    try {
+      for (const k of Object.keys(yakus)) {
+        const fn = (yakus as any)[k];
+        try {
+          const han = fn(hand, groups, this.windPlayer);
+          if (han && han > 0) return true;
+        } catch (e) {
+          // ignore detector errors
+        }
+      }
+    } catch (e) {
+      // ignore
+    }
+    return false;
   }
 
   private initializeGame(): void {
@@ -350,10 +373,10 @@ export class Game {
   public click(mp: MousePos): void {
     const rect = this.cv.getBoundingClientRect();
     
-    if (this.hasWin(0)) {
+    if (this.hasWin(0) && (!this.enableYakus || this.handHasAnyYaku(this.hands[0], this.groups[0]))) {
       this.resolveWin(0, 1);
       return;
-    } 
+    }
     
     if (this.chooseChii) {
       this.handleChiiSelection(mp, rect);
@@ -361,7 +384,7 @@ export class Game {
     }
     
     // Determine if Ron/Tsumo should be available for player 0
-    const canTsumo = this.hasPicked && this.hasWin(0);
+    const canTsumo = this.hasPicked && this.hasWin(0) && (!this.enableYakus || this.handHasAnyYaku(this.hands[0], this.groups[0]));
     let canRon = false;
     if (this.lastDiscard !== undefined && this.lastDiscard !== 0) {
       const d = this.discards[this.lastDiscard];
@@ -373,7 +396,9 @@ export class Game {
         }
         sim.push(new Tile(last.getFamily(), last.getValue(), last.isRed()));
         sim.sort();
-        canRon = sim.toGroup() !== undefined;
+  const simGroups = sim.toGroup() as Array<Group> | undefined;
+  const combinedGroups = this.groups[0].concat(simGroups ? simGroups : []);
+  canRon = sim.toGroup() !== undefined && (!this.enableYakus || this.handHasAnyYaku(sim, combinedGroups));
       }
     }
 
@@ -514,7 +539,7 @@ export class Game {
   }
 
   private handleBotTurn(): void {
-    if (this.hasWin(this.turn)) {
+    if (this.hasWin(this.turn) && (!this.enableYakus || this.handHasAnyYaku(this.hands[this.turn], this.groups[this.turn]))) {
       this.resolveWin(this.turn, 2);
       return;
     }
@@ -567,7 +592,9 @@ export class Game {
       }
       sim.push(new Tile(last.getFamily(), last.getValue(), last.isRed()));
       sim.sort();
-      if (sim.toGroup() !== undefined) return true;
+  const simGroups = sim.toGroup() as Array<Group> | undefined;
+  const combinedGroups = this.groups[p].concat(simGroups ? simGroups : []);
+  if (sim.toGroup() !== undefined && (!this.enableYakus || this.handHasAnyYaku(sim, combinedGroups))) return true;
     }
 
     return false;
@@ -589,7 +616,7 @@ export class Game {
     if (this.turn === 3) {
       this.turn = 0;
       this.pick(0);
-      if (this.hasWin(0)) {
+      if (this.hasWin(0) && (!this.enableYakus || this.handHasAnyYaku(this.hands[0], this.groups[0]))) {
         this.resolveWin(0, 1);
       }
     } else {
@@ -696,7 +723,7 @@ export class Game {
     this.tenpaiCacheVersion[p] = -1;
     this.canRonCache = { result: false };
 
-    if (this.hasWin(p)) {
+    if (this.hasWin(p) && (!this.enableYakus || this.handHasAnyYaku(this.hands[p], this.groups[p]))) {
       this.resolveWin(p, p === 0 ? 1 : 2);
     }
     
@@ -865,7 +892,7 @@ export class Game {
     this.tenpaiCacheVersion[thief] = -1;
     this.canRonCache = { result: false };
 
-    if (this.hasWin(thief)) {
+    if (this.hasWin(thief) && (!this.enableYakus || this.handHasAnyYaku(this.hands[thief], this.groups[thief]))) {
       this.resolveWin(thief, thief === 0 ? 1 : 2);
     }
     
@@ -903,7 +930,7 @@ export class Game {
       drawChiis(this.staticCtx, this.getChii(0));
     } else {
       // Compute availability of ron/tsumo for player 0
-      const canTsumoLocal = this.hasPicked && this.hasWin(0);
+      const canTsumoLocal = this.hasPicked && this.hasWin(0) && (!this.enableYakus || this.handHasAnyYaku(this.hands[0], this.groups[0]));
       let canRonLocal = false;
       if (this.lastDiscard !== undefined && this.lastDiscard !== 0) {
         // Use cache when lastDiscard and player's hand version are unchanged
@@ -919,7 +946,9 @@ export class Game {
             }
             sim.push(new Tile(last.getFamily(), last.getValue(), last.isRed()));
             sim.sort();
-            canRonLocal = sim.toGroup() !== undefined;
+            const simGroups = sim.toGroup() as Array<Group> | undefined;
+            const combinedGroups = this.groups[0].concat(simGroups ? simGroups : []);
+            canRonLocal = sim.toGroup() !== undefined && (!this.enableYakus || this.handHasAnyYaku(sim, combinedGroups));
           } else {
             canRonLocal = false;
           }
