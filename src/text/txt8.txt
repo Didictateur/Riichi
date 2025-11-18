@@ -1,5 +1,19 @@
-Cette page n'a pas *encore* été implémentée.
+~Chapitre 8 — Le Riichi~
 
-Merci de votre compréhension et de votre patience.
+Le #ff00ff{Riichi} est le yaku le plus important du riichi mahjong
+(d'où son nom).
 
+Pour le réaliser, la main doit *obligatoirement être fermée*.
+Lorsque le joueur est en situation de tenpai, il peut déclarer
+#ff00ff{Riichi} ! À ce moment-là, il défausse une tuile (qu'il
+placera de côté) et ne pourra plus choisir sa défausse :
 
+- Il *pioche*
+- Soit il *gagne*
+- Soit il *défausse* la tuile piochée
+
+Cela peut sembler contraignant, mais permet d'obtenir un yaku,
+quelle que soit la composition de la main (sous réserve d'être
+en tenpai)
+
+~Il est temps d'essayer de déclarer un Riichi !~
