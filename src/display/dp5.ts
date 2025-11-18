@@ -86,6 +86,24 @@ export async function initDisplay() {
     // Préchargement des ressources si nécessaire
     // const deck = new Deck();
     // await preloadDeck(deck);
+    // Charge et affiche l'image "ron.png" sur la partie gauche du canvas
+    try {
+        const ronImg = new Image();
+        ronImg.src = "img/ron.png";
+        await new Promise<void>((resolve) => {
+            ronImg.onload = () => resolve();
+            ronImg.onerror = () => {
+                console.warn("Impossible de charger img/ron.png");
+                resolve();
+            };
+        });
+
+    // Dessin de l'image en plein écran (remplit tout le canvas)
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    ctx.drawImage(ronImg, 0, 0, canvas.width, canvas.height);
+    } catch (err) {
+        console.error("Erreur lors du rendu de ron.png", err);
+    }
 }
 
 // Déclaration globale pour TypeScript
